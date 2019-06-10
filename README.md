@@ -22,6 +22,8 @@ I'm using free assets from the internet. I don't have too much choice so the gam
 
 # TODO
 
+Rolling
+
 I'm thinking about tower defence minigame (protecting your dungeon)
 
 New enemy class: healer
