@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MyRPGGame.Enemies
 {
-    public class FireBall : MonoBehaviour, IMissile
+    public class FireBall : MonoBehaviour, IDamageDealer
     {
         public AudioClip FireBallStart;
         public AudioClip FireBallExplosion;

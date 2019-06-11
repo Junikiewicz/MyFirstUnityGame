@@ -1,6 +1,6 @@
 ﻿namespace MyRPGGame.Enemies
 {
-    public interface IMissile
+    interface IDamageDealer
     {
         double DealDamage();
     }

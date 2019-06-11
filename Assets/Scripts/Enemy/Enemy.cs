@@ -7,7 +7,7 @@ using MyRPGGame.Templates;
 
 namespace MyRPGGame.Enemies
 {
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IDamageDealer
     {
         public static int numberOfEnemies = 0;
         public EnemyStatsTemplate enemyStatsTempalte;
@@ -35,6 +35,13 @@ namespace MyRPGGame.Enemies
         {
             return stats.GetStat(stat);
         }
+
+        //used by player
+        public double DealDamage()
+        {
+            return stats.GetStat(typeof(AttackDamage));
+        }
+
         protected virtual void Awake()
         {
             enemyRigidbody = GetComponent<Rigidbody2D>();

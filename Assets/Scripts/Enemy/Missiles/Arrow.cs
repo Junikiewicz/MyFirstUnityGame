@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MyRPGGame.Enemies
 {
-    public class Arrow : MonoBehaviour, IMissile
+    public class Arrow : MonoBehaviour, IDamageDealer
     {
         public AudioClip ArrowStart;
         public AudioClip ArrowHit;

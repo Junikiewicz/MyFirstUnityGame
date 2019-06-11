@@ -79,23 +79,14 @@ namespace MyRPGGame.Player
         }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.gameObject.tag == "EnemyHitTrigger")
+            IDamageDealer damageDealer = collision.attachedRigidbody.GetComponent<IDamageDealer>();
+            if (damageDealer!=null)
             {
-                playerStats.ChangeHealth(-collision.gameObject.GetComponentInParent<Enemy>().GetStat(typeof(AttackDamage)));
+                playerStats.ChangeHealth(-damageDealer.DealDamage());
                 gotHit.Play();
                 EventManager.Instance.TriggerEvent(new OnPlayerHit());
             }
-            else
-            {
-                if (collision.gameObject.tag == "Missile")
-                {
-                    playerStats.ChangeHealth(-collision.gameObject.GetComponent<IMissile>().DealDamage());
-                    gotHit.Play();
-                    EventManager.Instance.TriggerEvent(new OnPlayerHit());
-                }
-            }
         }
-
 
         private void PlayerMovement()
         {
