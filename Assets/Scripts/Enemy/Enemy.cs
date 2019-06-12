@@ -17,7 +17,7 @@ namespace MyRPGGame.Enemies
 
         protected StatBlock stats;
         protected Animator theAn;
-        
+
         private AudioSource audioSource;
         private Rigidbody2D enemyRigidbody;
         private Unit pathfindingUnit;
@@ -163,32 +163,30 @@ namespace MyRPGGame.Enemies
         {
             if (alive)
             {
-                if (collision.gameObject.tag == "PlayerHitTrigger")
+                if (collision.attachedRigidbody && collision.isTrigger)
                 {
-                    PlayerStatisticsController playerStatisticsController = collision.gameObject.GetComponentInParent<PlayerStatisticsController>();
+                    PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponentInParent<PlayerStatisticsController>();
                     if (playerStatisticsController)
                     {
                         double damageTaken = playerStatisticsController.DealDamage();
                         audioSource.Play();
-                        GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.3f, 0.3f)) + Vector3.up * (Random.Range(1f, 2f)), Quaternion.identity, transform);
-                        popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString());
                         TakeDamage(damageTaken);
-
+                        ShowDamageTaken(damageTaken);
                         if (CheckIfKilled())
                         {
                             playerStatisticsController.GainExperimence(stats.GetStat(typeof(Lvl)) * 100);
-                            numberOfEnemies--;
-                            EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(numberOfEnemies));
                             Die();
-                            if (numberOfEnemies == 0)
-                            {
-                                EventManager.Instance.TriggerEvent(new OnLevelCompleted());
-                            }
                         }
                     }
                 }
             }
         }
+        private void ShowDamageTaken(double damageTaken)
+        {
+            GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.3f, 0.3f)) + Vector3.up * (Random.Range(1f, 2f)), Quaternion.identity, transform);
+            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString());
+        }
+
         private void TakeDamage(double amountOfDamage)
         {
             stats.ChangeStatBase(typeof(Health), stats.GetStat(typeof(Health)) - amountOfDamage);
@@ -214,6 +212,12 @@ namespace MyRPGGame.Enemies
         }
         private void Die()
         {
+            numberOfEnemies--;
+            EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(numberOfEnemies));
+            if (numberOfEnemies == 0)
+            {
+                EventManager.Instance.TriggerEvent(new OnLevelCompleted());
+            }
             moving = false;
             alive = false;
             theAn.SetTrigger("Die");
