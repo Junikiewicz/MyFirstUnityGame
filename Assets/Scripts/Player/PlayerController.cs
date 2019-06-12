@@ -79,12 +79,15 @@ namespace MyRPGGame.Player
         }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            IDamageDealer damageDealer = collision.attachedRigidbody.GetComponent<IDamageDealer>();
-            if (damageDealer!=null)
+            if(collision.attachedRigidbody&&collision.isTrigger)
             {
-                playerStats.ChangeHealth(-damageDealer.DealDamage());
-                gotHit.Play();
-                EventManager.Instance.TriggerEvent(new OnPlayerHit());
+                IDamageDealer damageDealer = collision.attachedRigidbody.GetComponent<IDamageDealer>();
+                if (damageDealer != null)
+                {
+                    playerStats.ChangeHealth(-damageDealer.DealDamage());
+                    gotHit.Play();
+                    EventManager.Instance.TriggerEvent(new OnPlayerHit());
+                }
             }
         }
 
