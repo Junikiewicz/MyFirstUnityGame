@@ -5,6 +5,7 @@ using MyRPGGame.Player;
 using MyRPGGame.Events;
 using MyRPGGame.Templates;
 using MyRPGGame.Collectables;
+using System.Collections;
 
 namespace MyRPGGame.Enemies
 {
@@ -27,13 +28,17 @@ namespace MyRPGGame.Enemies
 
         private Vector3 currentDirection;
         private double distanceFromPlayer;
-        private bool moving = false;
-        private float attackTimer = 0;
+
+        private bool attacking;
         private bool alive = true;
+        private bool moving = false;
+        private bool randomRunning = false;
+        private float attackTimer = 0;
+
         protected bool pause = false;
+
         private int animatorX;
         private int animatorY;
-
         private const string AttackAnimationTag = "Attack";
         private const string XAnimatorParametr = "X";
         private const string YAnimatorParametr = "Y";
@@ -84,71 +89,30 @@ namespace MyRPGGame.Enemies
         }
         private void Update()
         {
-            if (alive && !pause && PlayerController.Instance != null)
+            if(alive&&!pause)
             {
-                if (pathfindingUnit.active == true)
+                attacking = theAn.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag);
+                if (!attacking)
                 {
-                    currentDirection = pathfindingUnit.currentDirection;
+                    if (pathfindingUnit.active)
+                    {
+                        currentDirection = pathfindingUnit.currentDirection;
+                    }
+                    SimpleAI();
                 }
-
-                SimpleAI();
-                if (theAn.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag))
-                {
-                    moving = false;
-                }
+                SetAnimations();
                 attackTimer += Time.deltaTime;
             }
         }
-        private void FixedUpdate()
-        {
-            if (!pause &&
-                moving &&
-                (currentDirection.x != 0 || currentDirection.y != 0) &&
-                (IsInvoking(nameof(ChoseRandomDirection)) || pathfindingUnit.pathPossible))
-            {
-                enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
-                if(Mathf.Abs(currentDirection.x)>Mathf.Abs(currentDirection.y))
-                {
-                    animatorX = Mathf.RoundToInt(currentDirection.x);
-                    animatorY = 0;
-                }
-                else
-                {
-                    animatorX = 0;
-                    animatorY = Mathf.RoundToInt(currentDirection.y);
-                }
-                theAn.SetFloat(LastXAnimatorParametr, animatorX);
-                theAn.SetFloat(LastYAnimatorParametr, animatorY);
-                theAn.SetFloat(XAnimatorParametr, animatorX);
-                theAn.SetFloat(YAnimatorParametr, animatorY);
-                
-            }
-            else
-            {
-                theAn.SetFloat(XAnimatorParametr, 0);
-                theAn.SetFloat(YAnimatorParametr, 0);
-                enemyRigidbody.velocity = Vector3.zero;
-            }
-        }
-        void SimpleAI()
+
+        private void SimpleAI()
         {
             distanceFromPlayer = Vector3.Distance(GetCurrentEnemyPosition(), PlayerController.Instance.GetCurrentPlayerPosition());
             if (distanceFromPlayer <= stats.GetStat(typeof(SightRange)))
             {
-                if (IsInvoking(nameof(ChoseRandomDirection)))
-                {
-                    CancelInvoke(nameof(ChoseRandomDirection));
-                }
-                if (distanceFromPlayer > stats.GetStat(typeof(AttackRange)))
-                {
-                    //followPlayer
-                    pathfindingUnit.active = true;
-                    moving = true;
-                }
-                else
+                if (distanceFromPlayer <= stats.GetStat(typeof(AttackRange)))
                 {
                     //attackPlayer
-                    pathfindingUnit.active = false;
                     moving = false;
                     if (attackTimer > 1 / stats.GetStat(typeof(AttackSpeed)))
                     {
@@ -156,32 +120,84 @@ namespace MyRPGGame.Enemies
                         attackTimer = 0;
                     }
                 }
+                else
+                {
+                    //followPlayer
+                    moving = true;
+                    pathfindingUnit.active = true;
+                }
             }
             else
             {
                 //doRandomStuff
-                if (!IsInvoking(nameof(ChoseRandomDirection)))
+                pathfindingUnit.active = false;
+                if (!randomRunning)
                 {
-                    InvokeRepeating(nameof(ChoseRandomDirection), 0, 1);
-                    pathfindingUnit.active = false;
-                    moving = true;
+                    StartCoroutine(RandomBehaviour());
                 }
             }
         }
-
-        private void ChoseRandomDirection()
+        private void SetAnimations()
         {
-            currentDirection = Random.insideUnitCircle;
-            if (moving == true)
+            if (Mathf.Abs(currentDirection.x) > Mathf.Abs(currentDirection.y))
             {
-                moving = false;
+                animatorX = currentDirection.x > 0 ? 1 : -1;
+                animatorY = 0;
             }
             else
             {
-                moving = true;
+                animatorX = 0;
+                animatorY = currentDirection.y > 0 ? 1 : -1;
+            }
+            theAn.SetFloat(LastXAnimatorParametr, animatorX);
+            theAn.SetFloat(LastYAnimatorParametr, animatorY);
+            if (moving)
+            {
+                theAn.SetFloat(XAnimatorParametr, animatorX);
+                theAn.SetFloat(YAnimatorParametr, animatorY);
+            }
+            else
+            {
+                theAn.SetFloat(XAnimatorParametr, 0);
+                theAn.SetFloat(YAnimatorParametr, 0);
             }
         }
 
+        private void FixedUpdate()
+        {
+            if (moving)
+            {
+                enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
+            }
+            else
+            {
+                enemyRigidbody.velocity = Vector3.zero;
+            }
+        }
+
+        IEnumerator RandomBehaviour()
+        {
+            randomRunning = true;
+            while (true)
+            {
+                if(pathfindingUnit.active||pause)
+                {
+                    randomRunning = false;
+                    yield break;
+                }
+                currentDirection = Random.insideUnitCircle;
+                if(moving)
+                {
+                    moving = false;
+                    yield return new WaitForSeconds(Random.Range(4, 5));
+                }
+                else
+                {
+                    moving = true;
+                    yield return new WaitForSeconds(Random.Range(1, 2));
+                }
+            }
+        }
         virtual protected void Attack()
         {
 
@@ -210,7 +226,7 @@ namespace MyRPGGame.Enemies
         private void ShowDamageTaken(double damageTaken)
         {
             GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.2f, 0.2f)) + Vector3.up * (Random.Range(0.5f, 1f)), Quaternion.identity, transform);
-            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString(),Color.white,3);
+            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString(), Color.white, 3);
         }
 
         private void TakeDamage(double amountOfDamage)
