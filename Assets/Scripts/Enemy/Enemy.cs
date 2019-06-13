@@ -31,6 +31,8 @@ namespace MyRPGGame.Enemies
         private float attackTimer = 0;
         private bool alive = true;
         protected bool pause = false;
+        private int animatorX;
+        private int animatorY;
 
         private const string AttackAnimationTag = "Attack";
         private const string XAnimatorParametr = "X";
@@ -105,10 +107,21 @@ namespace MyRPGGame.Enemies
                 (IsInvoking(nameof(ChoseRandomDirection)) || pathfindingUnit.pathPossible))
             {
                 enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
-                theAn.SetFloat(XAnimatorParametr, currentDirection.x);
-                theAn.SetFloat(YAnimatorParametr, currentDirection.y);
-                theAn.SetFloat(LastXAnimatorParametr, currentDirection.x);
-                theAn.SetFloat(LastYAnimatorParametr, currentDirection.y);
+                if(Mathf.Abs(currentDirection.x)>Mathf.Abs(currentDirection.y))
+                {
+                    animatorX = Mathf.RoundToInt(currentDirection.x);
+                    animatorY = 0;
+                }
+                else
+                {
+                    animatorX = 0;
+                    animatorY = Mathf.RoundToInt(currentDirection.y);
+                }
+                theAn.SetFloat(LastXAnimatorParametr, animatorX);
+                theAn.SetFloat(LastYAnimatorParametr, animatorY);
+                theAn.SetFloat(XAnimatorParametr, animatorX);
+                theAn.SetFloat(YAnimatorParametr, animatorY);
+                
             }
             else
             {
@@ -196,8 +209,8 @@ namespace MyRPGGame.Enemies
         }
         private void ShowDamageTaken(double damageTaken)
         {
-            GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.3f, 0.3f)) + Vector3.up * (Random.Range(1f, 2f)), Quaternion.identity, transform);
-            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString());
+            GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.2f, 0.2f)) + Vector3.up * (Random.Range(0.5f, 1f)), Quaternion.identity, transform);
+            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString(),Color.white,3);
         }
 
         private void TakeDamage(double amountOfDamage)

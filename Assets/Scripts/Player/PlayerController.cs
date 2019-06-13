@@ -10,6 +10,7 @@ namespace MyRPGGame.Player
         [SerializeField] private AudioSource gotHit;
         [SerializeField] private AudioSource heavyBreathing;
         [SerializeField] private AudioSource death;
+        [SerializeField] private GameObject damageTakenPopup;
 
         private PlayerStatisticsController playerStats;
         private Rigidbody2D playerRigibody2D;
@@ -88,7 +89,10 @@ namespace MyRPGGame.Player
                 IDamageDealer damageDealer = collision.attachedRigidbody.GetComponent<IDamageDealer>();
                 if (damageDealer != null)
                 {
-                    playerStats.ChangeHealth(-damageDealer.DealDamage());
+                    double damage = damageDealer.DealDamage();
+                    playerStats.ChangeHealth(-damage);
+                    GameObject popUp = Instantiate(damageTakenPopup, GetCurrentPlayerPosition() + Vector3.right * (Random.Range(-0.3f, 0.3f)) + Vector3.up * (Random.Range(1f, 2f)), Quaternion.identity, transform);
+                    popUp.GetComponentInChildren<PopupText>().ShowText(((int)damage).ToString(), Color.red, 3);
                     gotHit.Play();
                     EventManager.Instance.TriggerEvent(new OnPlayerHit());
                 }

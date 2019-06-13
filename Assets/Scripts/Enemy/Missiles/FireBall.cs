@@ -14,6 +14,8 @@ namespace MyRPGGame.Enemies
         private Animator theAn;
         private Rigidbody2D fireballRigidbody;
 
+        private const string ExplosionTrigger = "Explosion";
+        private const string ExplosionAnimationTag = "Explosion";
         private double damage;
         private bool moving = true;
         private bool pause;
@@ -34,7 +36,7 @@ namespace MyRPGGame.Enemies
             if (!pause)
             {
                 remainingLifeTime -= Time.deltaTime;
-                if (remainingLifeTime <= 0 && !theAn.GetCurrentAnimatorStateInfo(0).IsTag("Explosion"))
+                if (remainingLifeTime <= 0 && !theAn.GetCurrentAnimatorStateInfo(0).IsTag(ExplosionAnimationTag))
                 {
 
                 }
@@ -56,7 +58,8 @@ namespace MyRPGGame.Enemies
                 {
                     moving = false;
                     fireballRigidbody.velocity = Vector3.zero;
-                    theAn.SetTrigger("Explosion");
+                    theAn.SetTrigger(ExplosionTrigger);
+                    GetComponent<Collider2D>().enabled = false;
                     audioSource.clip = FireBallExplosion;
                     audioSource.Play();
                     Destroy(gameObject, FireBallExplosion.length);
@@ -66,24 +69,6 @@ namespace MyRPGGame.Enemies
             {
                 Destroy(gameObject);
             }
-
-
-
-
-            //if (collision.gameObject.tag != "Enemy" && collision.gameObject.tag != "EnemyHitTrigger" && collision.gameObject.tag != "Missile")
-            //{
-            //    moving = false;
-            //    fireballRigidbody.velocity = Vector3.zero;
-
-            //    if (collision.gameObject.tag == "Player")
-            //    {
-                    
-            //    }
-            //    else
-            //    {
-            //        Invoke(nameof(DestroyFireball), 0);
-            //    }
-            
         }
         public void SetDamage(double _damage)
         {

@@ -60,6 +60,7 @@ namespace MyRPGGame.Enemies
                     audioSource.clip = ArrowHit;
                     audioSource.Play();
                     GetComponent<SpriteRenderer>().enabled = false;
+                    GetComponent<Collider2D>().enabled = false;
                     Destroy(gameObject, ArrowHit.length);
                 }
             }
@@ -67,27 +68,6 @@ namespace MyRPGGame.Enemies
             {
                 Destroy(gameObject);
             }
-
-
-
-
-            //if (collision.gameObject.tag != "Enemy" && collision.gameObject.tag != "Missile")
-            //{
-            //    moving = false;
-            //    arrowRigidbody.velocity = Vector3.zero;
-
-            //    if (collision.gameObject.tag == "Player")
-            //    {
-            //        audioSource.clip = ArrowHit;
-            //        audioSource.Play();
-            //        GetComponent<SpriteRenderer>().sprite = null;
-                    
-            //    }
-            //    else
-            //    {
-            //        Destroy(gameObject);
-            //    }
-            //}
         }
         public void SetDamage(double _damage)
         {

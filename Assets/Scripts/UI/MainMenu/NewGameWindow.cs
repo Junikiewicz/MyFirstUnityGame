@@ -1,5 +1,4 @@
 ﻿using MyRPGGame.Events;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace MyRPGGame.UI
@@ -9,8 +8,11 @@ namespace MyRPGGame.UI
         public InputField characterNameInput;
         public void StartNewGame()
         {
-            EventManager.Instance.TriggerEvent(new OnNewGame(characterNameInput.text));
-            MainMenuController.Instance.CloseMainMenu();
+            if(characterNameInput.text!=string.Empty)
+            {
+                EventManager.Instance.TriggerEvent(new OnNewGame(characterNameInput.text));
+                MainMenuController.Instance.CloseMainMenu();
+            }
         }
     }
 

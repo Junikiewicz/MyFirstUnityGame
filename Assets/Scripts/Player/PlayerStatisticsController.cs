@@ -192,8 +192,8 @@ namespace MyRPGGame.Player
         private void PlayerNewGame(OnNewGame data)
         {
             SetStartingValues();
-            RefreshWholeGUI();
             gameObject.SetActive(true);
+            RefreshWholeGUI();
         }
         private void EndPause(OnPauseEnd data)
         {
@@ -212,11 +212,9 @@ namespace MyRPGGame.Player
             stats.ChangeStatBase(typeof(Experimence), data.saveData.experimence);
             stats.ChangeStatBase(typeof(Lvl), data.saveData.lvl);
             stats.ChangeStatBase(typeof(Gold), data.saveData.gold);
-
             stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(data.saveData.lvl));
-
-            RefreshWholeGUI();
             gameObject.SetActive(true);
+            RefreshWholeGUI();
         }
         public void SavePlayerStatsData(OnGameSaved data)
         {
