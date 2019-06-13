@@ -6,7 +6,7 @@ namespace MyRPGGame.World
 {
     public class DungeonExit : MonoBehaviour
     {
-        public string destinationScene;
+        public string destinationScene="World";
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.gameObject.tag == "Player")

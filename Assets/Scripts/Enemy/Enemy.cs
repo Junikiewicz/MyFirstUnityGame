@@ -4,6 +4,7 @@ using MyRPGGame.PathFinding;
 using MyRPGGame.Player;
 using MyRPGGame.Events;
 using MyRPGGame.Templates;
+using MyRPGGame.Collectables;
 
 namespace MyRPGGame.Enemies
 {
@@ -14,6 +15,8 @@ namespace MyRPGGame.Enemies
         public EnemyClass characterClass;
 
         public GameObject damageTakenPopup;
+        public GameObject goldCoin;
+        public GameObject expBall;
 
         protected StatBlock stats;
         protected Animator theAn;
@@ -21,7 +24,7 @@ namespace MyRPGGame.Enemies
         private AudioSource audioSource;
         private Rigidbody2D enemyRigidbody;
         private Unit pathfindingUnit;
-        private Vector3 currentPathfiningDirection;
+        private Vector3 currentDirection;
         private double distanceFromPlayer;
         private bool moving = false;
         private float attackTimer = 0;
@@ -97,7 +100,10 @@ namespace MyRPGGame.Enemies
         {
             if (alive && !pause && PlayerController.Instance != null)
             {
-                currentPathfiningDirection = pathfindingUnit.currentDirection;
+                if (pathfindingUnit.active == true)
+                {
+                    currentDirection = pathfindingUnit.currentDirection;
+                }
 
                 SimpleAI();
                 if (theAn.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
@@ -109,13 +115,16 @@ namespace MyRPGGame.Enemies
         }
         private void FixedUpdate()
         {
-            if (!pause && moving && (currentPathfiningDirection.x != 0 || currentPathfiningDirection.y != 0) && pathfindingUnit.pathPossible)
+            if (!pause &&
+                moving &&
+                (currentDirection.x != 0 || currentDirection.y != 0) &&
+                (IsInvoking(nameof(ChoseRandomDirection)) || pathfindingUnit.pathPossible))
             {
-                enemyRigidbody.velocity = currentPathfiningDirection * (float)stats.GetStat(typeof(Speed));
-                theAn.SetFloat("X", currentPathfiningDirection.x);
-                theAn.SetFloat("Y", currentPathfiningDirection.y);
-                theAn.SetFloat("LastX", currentPathfiningDirection.x);
-                theAn.SetFloat("LastY", currentPathfiningDirection.y);
+                enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
+                theAn.SetFloat("X", currentDirection.x);
+                theAn.SetFloat("Y", currentDirection.y);
+                theAn.SetFloat("LastX", currentDirection.x);
+                theAn.SetFloat("LastY", currentDirection.y);
             }
             else
             {
@@ -129,6 +138,10 @@ namespace MyRPGGame.Enemies
             distanceFromPlayer = Vector3.Distance(GetCurrentEnemyPosition(), PlayerController.Instance.GetCurrentPlayerPosition());
             if (distanceFromPlayer <= stats.GetStat(typeof(SightRange)))
             {
+                if (IsInvoking(nameof(ChoseRandomDirection)))
+                {
+                    CancelInvoke(nameof(ChoseRandomDirection));
+                }
                 if (distanceFromPlayer > stats.GetStat(typeof(AttackRange)))
                 {
                     //followPlayer
@@ -150,11 +163,28 @@ namespace MyRPGGame.Enemies
             else
             {
                 //doRandomStuff
-                //TO DO
-                pathfindingUnit.active = false;
-                moving = false;
+                if (!IsInvoking(nameof(ChoseRandomDirection)))
+                {
+                    InvokeRepeating(nameof(ChoseRandomDirection), 0, 1);
+                    pathfindingUnit.active = false;
+                    moving = true;
+                }
             }
         }
+
+        void ChoseRandomDirection()
+        {
+            currentDirection = Random.insideUnitCircle;
+            if (moving == true)
+            {
+                moving = false;
+            }
+            else
+            {
+                moving = true;
+            }
+        }
+
         virtual protected void Attack()
         {
 
@@ -165,7 +195,7 @@ namespace MyRPGGame.Enemies
             {
                 if (collision.attachedRigidbody && collision.isTrigger)
                 {
-                    PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponentInParent<PlayerStatisticsController>();
+                    PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponent<PlayerStatisticsController>();
                     if (playerStatisticsController)
                     {
                         double damageTaken = playerStatisticsController.DealDamage();
@@ -174,7 +204,6 @@ namespace MyRPGGame.Enemies
                         ShowDamageTaken(damageTaken);
                         if (CheckIfKilled())
                         {
-                            playerStatisticsController.GainExperimence(stats.GetStat(typeof(Lvl)) * 100);
                             Die();
                         }
                     }
@@ -199,19 +228,10 @@ namespace MyRPGGame.Enemies
             }
             return false;
         }
-        private void StartPause(OnPauseStart data)
-        {
-            enemyRigidbody.velocity = Vector3.zero;
-            theAn.speed = 0;
-            pause = true;
-        }
-        private void EndPause(OnPauseEnd data)
-        {
-            theAn.speed = 1;
-            pause = false;
-        }
         private void Die()
         {
+            DropItems(goldCoin, Random.Range(4,8));
+            DropItems(expBall, Random.Range(4, 8),10);
             numberOfEnemies--;
             EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(numberOfEnemies));
             if (numberOfEnemies == 0)
@@ -222,6 +242,26 @@ namespace MyRPGGame.Enemies
             alive = false;
             theAn.SetTrigger("Die");
             Destroy(gameObject, 0.6f);
+        }
+        private void DropItems(GameObject item, int amountOfItems,double valueMultiplicator=1)
+        {
+            for(int i=0;i<amountOfItems;i++)
+            {
+                var spawnedItem = Instantiate(item, transform.position + (Vector3)Random.insideUnitCircle * 1.5f, Quaternion.identity);
+                spawnedItem.GetComponent<Collectable>().value = stats.GetStat(typeof(Lvl))*valueMultiplicator;
+            }
+        }
+
+        private void StartPause(OnPauseStart data)
+        {
+            enemyRigidbody.velocity = Vector3.zero;
+            theAn.speed = 0;
+            pause = true;
+        }
+        private void EndPause(OnPauseEnd data)
+        {
+            theAn.speed = 1;
+            pause = false;
         }
         private void OnDestroy()
         {

@@ -7,13 +7,15 @@ namespace MyRPGGame.UI
     public class InfoPanelController : MonoBehaviour
     {
         public Text playerLvl;
+        public Text goldAmount;
         private void Awake()
         {
-            if (playerLvl)
+            if (playerLvl&&goldAmount)
             {
                 if (EventManager.Instance)
                 {
                     EventManager.Instance.AddListener<OnPlayerLvlChanged>(UpdateLvl);
+                    EventManager.Instance.AddListener<OnPlayerGoldChanged>(UpdateGold);
                 }
                 else
                 {
@@ -30,11 +32,18 @@ namespace MyRPGGame.UI
 
             playerLvl.text = eventDate.CurrentLvl.ToString();
         }
+
+        private void UpdateGold(OnPlayerGoldChanged eventData)
+        {
+            goldAmount.text = eventData.CurrentGold.ToString();
+        }
+
         private void OnDestroy()
         {
             if (EventManager.Instance)
             {
                 EventManager.Instance.RemoveListener<OnPlayerLvlChanged>(UpdateLvl);
+                EventManager.Instance.RemoveListener<OnPlayerGoldChanged>(UpdateGold);
             }
         }
     }

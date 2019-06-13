@@ -27,6 +27,7 @@ namespace MyRPGGame.Player
                 stats.AddStat(new Experimence(0));
                 stats.AddStat(new Lvl(0));
                 stats.AddStat(new RequiredExperimence(0));
+                stats.AddStat(new Gold(0));
                 if (EventManager.Instance)
                 {
                     EventManager.Instance.AddListener<OnGameLoaded>(LoadPlayerDataFromSave);
@@ -47,6 +48,7 @@ namespace MyRPGGame.Player
                 enabled = false;
             }
         }
+
         private void Start()
         {
             InvokeRepeating(nameof(Regeneration), 0, 0.1f);
@@ -67,6 +69,7 @@ namespace MyRPGGame.Player
                 stats.ChangeStatBase(typeof(Experimence), 0);
                 stats.ChangeStatBase(typeof(Lvl), 1);
                 stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(2));
+                stats.ChangeStatBase(typeof(Gold), 0);
             }
             else
             {
@@ -83,6 +86,7 @@ namespace MyRPGGame.Player
             EventManager.Instance.TriggerEvent(new OnPlayerExperimenceChanged(stats.GetStat(typeof(Experimence))));
             EventManager.Instance.TriggerEvent(new OnPlayerRequiredExperimenceChanged(stats.GetStat(typeof(RequiredExperimence))));
             EventManager.Instance.TriggerEvent(new OnPlayerLvlChanged(stats.GetStat(typeof(Lvl))));
+            EventManager.Instance.TriggerEvent(new OnPlayerGoldChanged(stats.GetStat(typeof(Gold))));
         }
 
         void Regeneration()
@@ -99,6 +103,14 @@ namespace MyRPGGame.Player
                 }
             }
         }
+
+        public void ChangeGold(double changeAmount)
+        {
+            double newValue = stats.GetStat(typeof(Gold)) + changeAmount;
+            stats.ChangeStatBase(typeof(Gold), newValue);
+            EventManager.Instance.TriggerEvent(new OnPlayerGoldChanged(newValue));
+        }
+
 
         public void GainExperimence(double amountOfExperimence)
         {
@@ -224,6 +236,7 @@ namespace MyRPGGame.Player
             stats.ChangeStatBase(typeof(AttackSpeed), data.saveData.attackSpeed);
             stats.ChangeStatBase(typeof(Experimence), data.saveData.experimence);
             stats.ChangeStatBase(typeof(Lvl), data.saveData.lvl);
+            stats.ChangeStatBase(typeof(Gold),data.saveData.gold);
 
             stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(data.saveData.lvl));
 
@@ -240,6 +253,7 @@ namespace MyRPGGame.Player
             data.saveData.attackSpeed = stats.GetStat(typeof(AttackSpeed));
             data.saveData.experimence = stats.GetStat(typeof(Experimence));
             data.saveData.lvl = stats.GetStat(typeof(Lvl));
+            data.saveData.gold = stats.GetStat(typeof(Gold));
         }
         void Die()
         {

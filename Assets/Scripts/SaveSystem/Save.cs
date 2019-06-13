@@ -14,6 +14,7 @@ namespace MyRPGGame.SaveSystem
 
         public double experimence;
         public double lvl;
+        public double gold;
 
         public int worldLvl;
 
