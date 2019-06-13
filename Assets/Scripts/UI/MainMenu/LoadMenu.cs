@@ -6,17 +6,8 @@ namespace MyRPGGame.UI
 {
     public class LoadMenu : MenuItem
     {
-        public GameObject buttonPrefab;
-        public GameObject contentList;
-
-        private void Awake()
-        {
-            if (!buttonPrefab || !contentList)
-            {
-                Debug.LogError(GetType() + " couldn't find one of its required components");
-                enabled = false;
-            }
-        }
+        [SerializeField] private GameObject buttonPrefab;
+        [SerializeField] private GameObject contentList;
         public override void OpenMenuItem()
         {
             base.OpenMenuItem();

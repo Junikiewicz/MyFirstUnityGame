@@ -2,29 +2,26 @@
 
 namespace MyRPGGame.UI
 {
-    class TitleMenu:MenuItem
+    class TitleMenu : MenuItem
     {
         private static TitleMenu _instace;
         private void Start()
         {
-            if(!_instace)
+            if (!_instace)
             {
-                if(MainMenuController.Instance)
-                {
-                    MainMenuController.Instance.defaulttMenuItem = this;
-                    MainMenuController.Instance.OpenMainMenu();
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find MainMenuController.");
-                }
+                MainMenuController.Instance.defaulttMenuItem = this;
+                MainMenuController.Instance.OpenMainMenu();
                 _instace = this;
+            }
+            else
+            {
+                Destroy(gameObject);//Prevent object duplicates when switching scenes
             }
         }
 
         private void OnDestroy()
         {
-            if(_instace==this)
+            if (_instace == this)
             {
                 _instace = null;
             }

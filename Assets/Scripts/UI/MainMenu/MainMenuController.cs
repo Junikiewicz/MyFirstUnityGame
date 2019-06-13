@@ -5,12 +5,15 @@ using UnityEngine.UI;
 
 namespace MyRPGGame.UI
 {
-    class MainMenuController:MonoBehaviour
+    class MainMenuController : MonoBehaviour
     {
-        private static MainMenuController _instance;
-        bool gameRunning = false;
-        Stack<MenuItem> menuItems = new Stack<MenuItem>();
         public MenuItem defaulttMenuItem;
+
+        private bool gameRunning = false;
+        private Stack<MenuItem> menuItems = new Stack<MenuItem>();
+        private const string CancelButton = "Cancel";
+
+        private static MainMenuController _instance;
         public static MainMenuController Instance
         {
             get
@@ -27,23 +30,19 @@ namespace MyRPGGame.UI
         {
             if (_instance == null)
             {
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnNewGame>(GameStarted);
-                    EventManager.Instance.AddListener<OnGameLoaded>(GameLoaded);
-                    EventManager.Instance.AddListener<OnPlayerKilled>(GameEnded);
-                    _instance = this;
-                }
-                else
-                {
-                    enabled = false;
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
+                _instance = this;
+                EventManager.Instance.AddListener<OnNewGame>(GameStarted);
+                EventManager.Instance.AddListener<OnGameLoaded>(GameLoaded);
+                EventManager.Instance.AddListener<OnPlayerKilled>(GameEnded);
+            }
+            else
+            {
+                Destroy(gameObject);//Prevent object duplicates when switching scenes
             }
         }
         private void Update()
         {
-            if (Input.GetButtonDown("Cancel"))
+            if (Input.GetButtonDown(CancelButton))
             {
                 if (menuItems.Count == 0)
                 {
@@ -67,7 +66,7 @@ namespace MyRPGGame.UI
         {
             EventManager.Instance.TriggerEvent(new OnMenuClosed());
             int amountOfItems = menuItems.Count;
-            for(int i=0;i<amountOfItems;i++)
+            for (int i = 0; i < amountOfItems; i++)
             {
                 HideTopElement();
             }
@@ -78,7 +77,7 @@ namespace MyRPGGame.UI
         {
             EventManager.Instance.TriggerEvent(new OnMenuOpened());
             gameObject.GetComponent<Image>().enabled = true;
-            if(defaulttMenuItem!=null)
+            if (defaulttMenuItem != null)
             {
                 AddNewElementOnTop(defaulttMenuItem);
             }
@@ -86,8 +85,8 @@ namespace MyRPGGame.UI
         }
         public void HideTopElement()
         {
-                menuItems.Pop().Hide();
-           
+            menuItems.Pop().Hide();
+
             if (menuItems.Count > 0)
             {
                 menuItems.Peek().Show();
@@ -95,7 +94,7 @@ namespace MyRPGGame.UI
         }
         public void AddNewElementOnTop(MenuItem newItem)
         {
-            if(menuItems.Count>0)
+            if (menuItems.Count > 0)
             {
                 menuItems.Peek().Hide();
             }
@@ -120,12 +119,9 @@ namespace MyRPGGame.UI
 
         private void OnDestroy()
         {
-            if(EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnNewGame>(GameStarted);
-                EventManager.Instance.RemoveListener<OnGameLoaded>(GameLoaded);
-                EventManager.Instance.RemoveListener<OnPlayerKilled>(GameEnded);
-            }
+            EventManager.Instance.RemoveListener<OnNewGame>(GameStarted);
+            EventManager.Instance.RemoveListener<OnGameLoaded>(GameLoaded);
+            EventManager.Instance.RemoveListener<OnPlayerKilled>(GameEnded);
         }
     }
 }

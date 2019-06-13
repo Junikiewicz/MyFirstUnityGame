@@ -7,75 +7,51 @@ namespace MyRPGGame.Player
 {
     public class PlayerStatisticsController : MonoBehaviour
     {
-        public PlayerStatsTemplate playerStatsTemplate;
+        [SerializeField] private PlayerStatsTemplate playerStatsTemplate;
         private StatBlock stats;
         private bool pause = true;
         private void Awake()
         {
             stats = gameObject.AddComponent<StatBlock>();
-            if (stats)
-            {
-                stats.AddStat(new HealthRegeneration(0));
-                stats.AddStat(new StaminaRegeneration(0));
-                stats.AddStat(new Stamina(0));
-                stats.AddStat(new MaximumStamina(0));
-                stats.AddStat(new Speed(0));
-                stats.AddStat(new Health(0));
-                stats.AddStat(new MaximumHealth(0));
-                stats.AddStat(new AttackDamage(0));
-                stats.AddStat(new AttackSpeed(0));
-                stats.AddStat(new Experimence(0));
-                stats.AddStat(new Lvl(0));
-                stats.AddStat(new RequiredExperimence(0));
-                stats.AddStat(new Gold(0));
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnGameLoaded>(LoadPlayerDataFromSave);
-                    EventManager.Instance.AddListener<OnGameSaved>(SavePlayerStatsData);
-                    EventManager.Instance.AddListener<OnPauseStart>(StartPause);
-                    EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
-                    EventManager.Instance.AddListener<OnNewGame>(PlayerNewGame);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager");
-                    enabled = false;
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't create StatBlock.");
-                enabled = false;
-            }
+            stats.AddStat(new HealthRegeneration(0));
+            stats.AddStat(new StaminaRegeneration(0));
+            stats.AddStat(new Stamina(0));
+            stats.AddStat(new MaximumStamina(0));
+            stats.AddStat(new Speed(0));
+            stats.AddStat(new Health(0));
+            stats.AddStat(new MaximumHealth(0));
+            stats.AddStat(new AttackDamage(0));
+            stats.AddStat(new AttackSpeed(0));
+            stats.AddStat(new Experimence(0));
+            stats.AddStat(new Lvl(0));
+            stats.AddStat(new RequiredExperimence(0));
+            stats.AddStat(new Gold(0));
+            EventManager.Instance.AddListener<OnGameLoaded>(LoadPlayerDataFromSave);
+            EventManager.Instance.AddListener<OnGameSaved>(SavePlayerStatsData);
+            EventManager.Instance.AddListener<OnPauseStart>(StartPause);
+            EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
+            EventManager.Instance.AddListener<OnNewGame>(PlayerNewGame);
         }
 
-        private void Start()
+        private void OnEnable()
         {
             InvokeRepeating(nameof(Regeneration), 0, 0.1f);
         }
         public void SetStartingValues()
         {
-            if (playerStatsTemplate)
-            {
-                stats.ChangeStatBase(typeof(HealthRegeneration), playerStatsTemplate.startingHealthRegeneration);
-                stats.ChangeStatBase(typeof(StaminaRegeneration), playerStatsTemplate.startingStaminaRegeneration);
-                stats.ChangeStatBase(typeof(Stamina), playerStatsTemplate.startingMaxStamina);
-                stats.ChangeStatBase(typeof(MaximumStamina), playerStatsTemplate.startingMaxStamina);
-                stats.ChangeStatBase(typeof(Speed), playerStatsTemplate.startingSpeed);
-                stats.ChangeStatBase(typeof(Health), playerStatsTemplate.startingMaxHealth);
-                stats.ChangeStatBase(typeof(MaximumHealth), playerStatsTemplate.startingMaxHealth);
-                stats.ChangeStatBase(typeof(AttackDamage), playerStatsTemplate.startingAttackDamage);
-                stats.ChangeStatBase(typeof(AttackSpeed), playerStatsTemplate.startingAttackSpeed);
-                stats.ChangeStatBase(typeof(Experimence), 0);
-                stats.ChangeStatBase(typeof(Lvl), 1);
-                stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(2));
-                stats.ChangeStatBase(typeof(Gold), 0);
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find StatTemplate.");
-                enabled = false;
-            }
+            stats.ChangeStatBase(typeof(HealthRegeneration), playerStatsTemplate.startingHealthRegeneration);
+            stats.ChangeStatBase(typeof(StaminaRegeneration), playerStatsTemplate.startingStaminaRegeneration);
+            stats.ChangeStatBase(typeof(Stamina), playerStatsTemplate.startingMaxStamina);
+            stats.ChangeStatBase(typeof(MaximumStamina), playerStatsTemplate.startingMaxStamina);
+            stats.ChangeStatBase(typeof(Speed), playerStatsTemplate.startingSpeed);
+            stats.ChangeStatBase(typeof(Health), playerStatsTemplate.startingMaxHealth);
+            stats.ChangeStatBase(typeof(MaximumHealth), playerStatsTemplate.startingMaxHealth);
+            stats.ChangeStatBase(typeof(AttackDamage), playerStatsTemplate.startingAttackDamage);
+            stats.ChangeStatBase(typeof(AttackSpeed), playerStatsTemplate.startingAttackSpeed);
+            stats.ChangeStatBase(typeof(Experimence), 0);
+            stats.ChangeStatBase(typeof(Lvl), 1);
+            stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(2));
+            stats.ChangeStatBase(typeof(Gold), 0);
         }
         public void RefreshWholeGUI()
         {
@@ -89,7 +65,7 @@ namespace MyRPGGame.Player
             EventManager.Instance.TriggerEvent(new OnPlayerGoldChanged(stats.GetStat(typeof(Gold))));
         }
 
-        void Regeneration()
+        private void Regeneration()
         {
             if (!pause)
             {
@@ -110,7 +86,6 @@ namespace MyRPGGame.Player
             stats.ChangeStatBase(typeof(Gold), newValue);
             EventManager.Instance.TriggerEvent(new OnPlayerGoldChanged(newValue));
         }
-
 
         public void GainExperimence(double amountOfExperimence)
         {
@@ -210,7 +185,7 @@ namespace MyRPGGame.Player
             result = Mathf.Floor((float)(result / 4));
             return result;
         }
-        void StartPause(OnPauseStart data)
+        private void StartPause(OnPauseStart data)
         {
             pause = true;
         }
@@ -220,7 +195,7 @@ namespace MyRPGGame.Player
             RefreshWholeGUI();
             gameObject.SetActive(true);
         }
-        void EndPause(OnPauseEnd data)
+        private void EndPause(OnPauseEnd data)
         {
             pause = false;
         }
@@ -236,7 +211,7 @@ namespace MyRPGGame.Player
             stats.ChangeStatBase(typeof(AttackSpeed), data.saveData.attackSpeed);
             stats.ChangeStatBase(typeof(Experimence), data.saveData.experimence);
             stats.ChangeStatBase(typeof(Lvl), data.saveData.lvl);
-            stats.ChangeStatBase(typeof(Gold),data.saveData.gold);
+            stats.ChangeStatBase(typeof(Gold), data.saveData.gold);
 
             stats.ChangeStatBase(typeof(RequiredExperimence), CalculateExperimenceRequired(data.saveData.lvl));
 
@@ -255,7 +230,8 @@ namespace MyRPGGame.Player
             data.saveData.lvl = stats.GetStat(typeof(Lvl));
             data.saveData.gold = stats.GetStat(typeof(Gold));
         }
-        void Die()
+
+        private void Die()
         {
             EventManager.Instance.TriggerEvent(new OnPlayerKilled());
             Invoke(nameof(DeactivatePlayer), 1f);
@@ -264,7 +240,13 @@ namespace MyRPGGame.Player
         {
             gameObject.SetActive(false);
         }
-        void OnDestroy()
+
+        private void OnDisable()
+        {
+            CancelInvoke(nameof(Regeneration));
+        }
+
+        private void OnDestroy()
         {
             if (EventManager.Instance)
             {

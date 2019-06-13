@@ -5,13 +5,11 @@ namespace MyRPGGame.Audio
 {
     public class MusicPlayerController : MonoBehaviour
     {
-        public AudioClip fightMusic;
-        public AudioClip dungeonMusic;
-        public AudioClip menuMusic;
+        [SerializeField] private AudioClip fightMusic,dungeonMusic,menuMusic;
 
         private AudioSource musicSpeaker;
         private bool isPlayerInDungeon = true;
-        static private MusicPlayerController _instance;
+        private static MusicPlayerController _instance;
         private void Awake()
         {
             if (_instance == null)
@@ -19,26 +17,13 @@ namespace MyRPGGame.Audio
                 _instance = this;
                 DontDestroyOnLoad(gameObject);
                 musicSpeaker = GetComponent<AudioSource>();
-                if (musicSpeaker)
-                {
-                    if (EventManager.Instance)
-                    {
-                        EventManager.Instance.AddListener<OnDungeonLeft>(StartFightMusic);
-                        EventManager.Instance.AddListener<OnPortalEntered>(StartDungeonMusic);
-                        EventManager.Instance.AddListener<OnMenuOpened>(StartMenuMusic);
-                        EventManager.Instance.AddListener<OnMenuClosed>(ResumeMusicAfterMenuClosed);
-                        EventManager.Instance.AddListener<OnGameLoaded>(StartDungeonMusic);
-                        EventManager.Instance.AddListener<OnLevelCompleted>(StopMusic);
-                    }
-                    else
-                    {
-                        Debug.LogError(GetType() + " couldn't find EventManager.");
-                    }
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find AudioSource.");
-                }
+
+                EventManager.Instance.AddListener<OnDungeonLeft>(StartFightMusic);
+                EventManager.Instance.AddListener<OnPortalEntered>(StartDungeonMusic);
+                EventManager.Instance.AddListener<OnMenuOpened>(StartMenuMusic);
+                EventManager.Instance.AddListener<OnMenuClosed>(ResumeMusicAfterMenuClosed);
+                EventManager.Instance.AddListener<OnGameLoaded>(StartDungeonMusic);
+                EventManager.Instance.AddListener<OnLevelCompleted>(StopMusic);
             }
             else
             {
@@ -70,7 +55,6 @@ namespace MyRPGGame.Audio
             isPlayerInDungeon = false;
             musicSpeaker.Play();
         }
-
         private void StopMusic(OnLevelCompleted data)
         {
             musicSpeaker.Stop();
@@ -92,17 +76,15 @@ namespace MyRPGGame.Audio
         }
         private void OnDestroy()
         {
-            if(_instance==this)
+            if (_instance == this)
             {
                 _instance = null;
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.RemoveListener<OnDungeonLeft>(StartFightMusic);
-                    EventManager.Instance.RemoveListener<OnPortalEntered>(StartDungeonMusic);
-                    EventManager.Instance.RemoveListener<OnMenuOpened>(StartMenuMusic);
-                    EventManager.Instance.RemoveListener<OnMenuClosed>(ResumeMusicAfterMenuClosed);
-                    EventManager.Instance.RemoveListener<OnGameLoaded>(StartDungeonMusic);
-                }
+
+                EventManager.Instance.RemoveListener<OnDungeonLeft>(StartFightMusic);
+                EventManager.Instance.RemoveListener<OnPortalEntered>(StartDungeonMusic);
+                EventManager.Instance.RemoveListener<OnMenuOpened>(StartMenuMusic);
+                EventManager.Instance.RemoveListener<OnMenuClosed>(ResumeMusicAfterMenuClosed);
+                EventManager.Instance.RemoveListener<OnGameLoaded>(StartDungeonMusic);
             }
         }
     }

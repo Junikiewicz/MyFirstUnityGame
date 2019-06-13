@@ -6,47 +6,10 @@ namespace MyRPGGame.Statistic
 {
     public class StatBlock : MonoBehaviour
     {
-        Dictionary<System.Type, Statistic> statistics = new Dictionary<System.Type, Statistic>();
+        private Dictionary<System.Type, Statistic> statistics = new Dictionary<System.Type, Statistic>();
         public void AddStat(Statistic stat)
         {
             statistics.Add(stat.GetType(), stat);
-        }
-        public void ApplyStatModifier(System.Type typeOfStat, double value, bool isModifierMultiplicative, float time = 0)
-        {
-            if (statistics.TryGetValue(typeOfStat, out Statistic sts))
-            {
-                if (isModifierMultiplicative)
-                {
-                    sts.MultiplicativeModifers.Add(value);
-                }
-                else
-                {
-                    sts.AdditiveModifiers.Add(value);
-                }
-                sts.CalculateCurrentValue();
-                if (time != 0)
-                {
-                    StartCoroutine(RevertStatModifier(sts, isModifierMultiplicative, value, time));
-                }
-            }
-            else
-            {
-                Debug.LogError("Stat: " + typeOfStat + ",that you are trying to add modifier to, couldn't be found!");
-            }
-        }
-        IEnumerator RevertStatModifier(Statistic statistic, bool isModifierMultiplicative, double value, float delayTime)
-        {
-            yield return new WaitForSeconds(delayTime);
-
-            if (isModifierMultiplicative)
-            {
-                statistic.MultiplicativeModifers.Remove(value);
-            }
-            else
-            {
-                statistic.AdditiveModifiers.Remove(value);
-            }
-            statistic.CalculateCurrentValue();
         }
         public void ChangeStatBase(System.Type typeOfStat, double value)
         {
@@ -72,5 +35,43 @@ namespace MyRPGGame.Statistic
                 return 0;
             }
         }
+        public void ApplyStatModifier(System.Type typeOfStat, double value, bool isModifierMultiplicative, float time = 0)
+        {
+            if (statistics.TryGetValue(typeOfStat, out Statistic sts))
+            {
+                if (isModifierMultiplicative)
+                {
+                    sts.MultiplicativeModifers.Add(value);
+                }
+                else
+                {
+                    sts.AdditiveModifiers.Add(value);
+                }
+                sts.CalculateCurrentValue();
+                if (time != 0)
+                {
+                    StartCoroutine(RevertStatModifier(sts, isModifierMultiplicative, value, time));
+                }
+            }
+            else
+            {
+                Debug.LogError("Stat: " + typeOfStat + ",that you are trying to add modifier to, couldn't be found!");
+            }
+        }
+        private IEnumerator RevertStatModifier(Statistic statistic, bool isModifierMultiplicative, double value, float delayTime)
+        {
+            yield return new WaitForSeconds(delayTime);
+
+            if (isModifierMultiplicative)
+            {
+                statistic.MultiplicativeModifers.Remove(value);
+            }
+            else
+            {
+                statistic.AdditiveModifiers.Remove(value);
+            }
+            statistic.CalculateCurrentValue();
+        }
+       
     }
 }

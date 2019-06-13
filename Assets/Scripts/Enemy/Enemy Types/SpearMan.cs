@@ -2,6 +2,7 @@
 {
     public class SpearMan : Enemy
     {
+        private const string AnimatorThrustTrigger = "Thrust";
         protected override void Awake()
         {
             base.Awake();
@@ -14,7 +15,7 @@
         protected override void Attack()
         {
             base.Attack();
-            theAn.SetTrigger("Thrust");
+            theAn.SetTrigger(AnimatorThrustTrigger);
         }
     }
 }

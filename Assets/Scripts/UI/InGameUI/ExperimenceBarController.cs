@@ -6,37 +6,23 @@ namespace MyRPGGame.UI
 {
     public class ExperimenceBarController : MonoBehaviour
     {
-        public Image expBar;
+        [SerializeField] private Image expBar;
 
         private double currentExperimence;
         private double requiredExperimence;
         private void Awake()
         {
-            if (expBar)
-            {
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnPlayerExperimenceChanged>(UpdateExperimence);
-                    EventManager.Instance.AddListener<OnPlayerRequiredExperimenceChanged>(UpdateRequiredExperimence);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its graphics components");
-            }
+            EventManager.Instance.AddListener<OnPlayerExperimenceChanged>(UpdateExperimence);
+            EventManager.Instance.AddListener<OnPlayerRequiredExperimenceChanged>(UpdateRequiredExperimence);
         }
-        private void UpdateExperimence(OnPlayerExperimenceChanged eventDate)
+        private void UpdateExperimence(OnPlayerExperimenceChanged eventData)
         {
-            currentExperimence = eventDate.CurrentExperimence;
+            currentExperimence = eventData.CurrentExperimence;
             UpdateBar();
         }
-        private void UpdateRequiredExperimence(OnPlayerRequiredExperimenceChanged eventDate)
+        private void UpdateRequiredExperimence(OnPlayerRequiredExperimenceChanged eventData)
         {
-            requiredExperimence = eventDate.RequiredExperimence;
+            requiredExperimence = eventData.RequiredExperimence;
             UpdateBar();
         }
         private void UpdateBar()
@@ -45,11 +31,8 @@ namespace MyRPGGame.UI
         }
         private void OnDestroy()
         {
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnPlayerExperimenceChanged>(UpdateExperimence);
-                EventManager.Instance.RemoveListener<OnPlayerRequiredExperimenceChanged>(UpdateRequiredExperimence);
-            }
+            EventManager.Instance.RemoveListener<OnPlayerExperimenceChanged>(UpdateExperimence);
+            EventManager.Instance.RemoveListener<OnPlayerRequiredExperimenceChanged>(UpdateRequiredExperimence);
         }
     }
 }

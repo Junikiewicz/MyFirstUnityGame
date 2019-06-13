@@ -6,50 +6,32 @@ namespace MyRPGGame.Enemies
 {
     public class Arrow : MonoBehaviour, IDamageDealer
     {
-        public AudioClip ArrowStart;
-        public AudioClip ArrowHit;
+        [SerializeField] private AudioClip ArrowStart;
+        [SerializeField] private AudioClip ArrowHit;
+        [SerializeField] private float speed = 10;
+        [SerializeField] private float targetRadius = 0.1f;
+
         private AudioSource audioSource;
+        private Rigidbody2D arrowRigidbody;
+
         private Vector3 target;
         private double damage;
-        private Rigidbody2D arrowRigidbody;
         private bool moving = true;
         private bool pause = false;
-        private readonly float speed = 10;
-        private readonly float targetRadius = 0.1f;
 
         private void Awake()
         {
             arrowRigidbody = GetComponent<Rigidbody2D>();
             audioSource = GetComponent<AudioSource>();
-            if (arrowRigidbody && audioSource)
-            {
-                audioSource.clip = ArrowStart;
-                audioSource.Play();    
-                if (PlayerController.Instance)
-                {
-                    target = PlayerController.Instance.GetCurrentPlayerPosition();
-                    transform.up = transform.position - target;
-                    if (EventManager.Instance)
-                    {
-                        EventManager.Instance.AddListener<OnPauseStart>(StartPause);
-                        EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
-                    }
-                    else
-                    {
-                        Debug.LogError(GetType() + " couldn't find EventManager.");
-                    }
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find PlayerController");
-                    enabled = false;
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its required components");
-                enabled = false;
-            }
+            audioSource.clip = ArrowStart;
+            audioSource.Play();
+
+            target = PlayerController.Instance.GetCurrentPlayerPosition();
+
+            transform.up = transform.position - target;
+
+            EventManager.Instance.AddListener<OnPauseStart>(StartPause);
+            EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
         }
 
         private void Update()
@@ -69,23 +51,43 @@ namespace MyRPGGame.Enemies
         }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.gameObject.tag != "Enemy" && collision.gameObject.tag != "Missile")
+            if(collision.attachedRigidbody)
             {
-                moving = false;
-                arrowRigidbody.velocity = Vector3.zero;
-
-                if (collision.gameObject.tag == "Player")
+                if(collision.attachedRigidbody.GetComponent<PlayerController>())
                 {
+                    moving = false;
+                    arrowRigidbody.velocity = Vector3.zero;
                     audioSource.clip = ArrowHit;
                     audioSource.Play();
-                    GetComponent<SpriteRenderer>().sprite = null;
+                    GetComponent<SpriteRenderer>().enabled = false;
                     Destroy(gameObject, ArrowHit.length);
                 }
-                else
-                {
-                    Destroy(gameObject);
-                }
             }
+            else
+            {
+                Destroy(gameObject);
+            }
+
+
+
+
+            //if (collision.gameObject.tag != "Enemy" && collision.gameObject.tag != "Missile")
+            //{
+            //    moving = false;
+            //    arrowRigidbody.velocity = Vector3.zero;
+
+            //    if (collision.gameObject.tag == "Player")
+            //    {
+            //        audioSource.clip = ArrowHit;
+            //        audioSource.Play();
+            //        GetComponent<SpriteRenderer>().sprite = null;
+                    
+            //    }
+            //    else
+            //    {
+            //        Destroy(gameObject);
+            //    }
+            //}
         }
         public void SetDamage(double _damage)
         {
@@ -95,22 +97,19 @@ namespace MyRPGGame.Enemies
         {
             return damage;
         }
-        private void StartPause(OnPauseStart data)
+        private void StartPause(OnPauseStart eventData)
         {
             arrowRigidbody.velocity = Vector3.zero;
             pause = true;
         }
-        private void EndPause(OnPauseEnd data)
+        private void EndPause(OnPauseEnd eventData)
         {
             pause = false;
         }
         private void OnDestroy()
         {
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnPauseStart>(StartPause);
-                EventManager.Instance.RemoveListener<OnPauseEnd>(EndPause);
-            }
+            EventManager.Instance.RemoveListener<OnPauseStart>(StartPause);
+            EventManager.Instance.RemoveListener<OnPauseEnd>(EndPause);
         }
     }
 }

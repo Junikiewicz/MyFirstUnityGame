@@ -2,6 +2,7 @@
 {
     public class Knight : Enemy
     {
+        private const string AnimatorSlashTrigger = "Slash";
         protected override void Awake()
         {
             base.Awake();
@@ -14,7 +15,7 @@
         protected override void Attack()
         {
             base.Attack();
-            theAn.SetTrigger("Slash");
+            theAn.SetTrigger(AnimatorSlashTrigger);
         }
     }
 }

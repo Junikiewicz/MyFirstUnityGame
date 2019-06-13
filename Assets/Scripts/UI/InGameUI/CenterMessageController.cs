@@ -6,53 +6,34 @@ namespace MyRPGGame.UI
 {
     public class CenterMessageController : MonoBehaviour
     {
-        public Text message;
+        [SerializeField] private Text message;
+
         private Animator animator;
+        private const string OnDeathMessage = "YOU DIED";
+        private const string OnLevelCompletedMessage = "LEVEL COMPLETED";
+        private const string YouDiedTrigger = "YouDied";
+        private const string LevelCompletedTrigger = "LevelCompleted";
         private void Awake()
         {
             animator = GetComponent<Animator>();
-            if (animator)
-            {
-                if (message)
-                {
-                    if (EventManager.Instance)
-                    {
-                        EventManager.Instance.AddListener<OnPlayerKilled>(ShowYouDiedMessage);
-                        EventManager.Instance.AddListener<OnLevelCompleted>(ShowLevelCompletedMessage);
-                    }
-                    else
-                    {
-                        Debug.LogError(GetType() + " couldn't find EventManager.");
-                    }
 
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find one of its graphics components");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find animator");
-            }
+            EventManager.Instance.AddListener<OnPlayerKilled>(ShowYouDiedMessage);
+            EventManager.Instance.AddListener<OnLevelCompleted>(ShowLevelCompletedMessage);
         }
-        private void ShowYouDiedMessage(OnPlayerKilled data)
+        private void ShowYouDiedMessage(OnPlayerKilled eventData)
         {
-            message.text = "YOU DIED";
-            animator.SetTrigger("YouDied");
+            message.text = OnDeathMessage;
+            animator.SetTrigger(YouDiedTrigger);
         }
-        private void ShowLevelCompletedMessage(OnLevelCompleted data)
+        private void ShowLevelCompletedMessage(OnLevelCompleted eventData)
         {
-            message.text = "LEVEL COMPLETED";
-            animator.SetTrigger("LevelCompleted");
+            message.text = OnLevelCompletedMessage;
+            animator.SetTrigger(LevelCompletedTrigger);
         }
         private void OnDestroy()
         {
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnPlayerKilled>(ShowYouDiedMessage);
-                EventManager.Instance.RemoveListener<OnLevelCompleted>(ShowLevelCompletedMessage);
-            }
+            EventManager.Instance.RemoveListener<OnPlayerKilled>(ShowYouDiedMessage);
+            EventManager.Instance.RemoveListener<OnLevelCompleted>(ShowLevelCompletedMessage);
         }
     }
 }

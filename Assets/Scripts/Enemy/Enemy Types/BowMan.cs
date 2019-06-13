@@ -6,7 +6,9 @@ namespace MyRPGGame.Enemies
 {
     public class BowMan : Enemy
     {
-        public GameObject arrow;
+        [SerializeField] private GameObject arrow;
+
+        private const string AnimatorShotTrigger = "Shot";
         protected override void Awake()
         {
             base.Awake();
@@ -21,32 +23,18 @@ namespace MyRPGGame.Enemies
             base.Attack();
             if (PlayerController.Instance != null)
             {
-                theAn.SetTrigger("Shot");
+                theAn.SetTrigger(AnimatorShotTrigger);
                 Invoke(nameof(LauchArrow), 1f);
             }
         }
         void LauchArrow()
         {
-            if(!pause)
+            if (!pause)
             {
-                if (arrow)
-                {
-                    GameObject missile = Instantiate(arrow, transform.position, Quaternion.identity);
-                    Arrow arrowComponent = missile.GetComponent<Arrow>();
-                    if (arrowComponent)
-                    {
-                        arrowComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
-                    }
-                    else
-                    {
-                        Debug.LogError(GetType() + " couldn't find arrowComponent on prefab.");
-                    }
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find arrow prefab.");
-                }
-            } 
+                GameObject missile = Instantiate(arrow, transform.position, Quaternion.identity);
+                Arrow arrowComponent = missile.GetComponent<Arrow>();
+                arrowComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
+            }
         }
     }
 }

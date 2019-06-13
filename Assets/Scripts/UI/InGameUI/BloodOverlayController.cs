@@ -6,28 +6,14 @@ namespace MyRPGGame.UI
 {
     public class BloodOverlayController : MonoBehaviour
     {
-        public Image bloodOverlay;
+        [SerializeField] private Image bloodOverlay;
 
         private double currentHealth;
         private double maximumHealth;
         private void Awake()
         {
-            if (bloodOverlay)
-            {
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnPlayerHealthChanged>(UpdateHealth);
-                    EventManager.Instance.AddListener<OnPlayerMaxHealthChanged>(UpdateMaximumHealth);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its graphics components");
-            }
+            EventManager.Instance.AddListener<OnPlayerHealthChanged>(UpdateHealth);
+            EventManager.Instance.AddListener<OnPlayerMaxHealthChanged>(UpdateMaximumHealth);
         }
         private void UpdateHealth(OnPlayerHealthChanged eventData)
         {
@@ -47,11 +33,8 @@ namespace MyRPGGame.UI
         }
         private void OnDestroy()
         {
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnPlayerHealthChanged>(UpdateHealth);
-                EventManager.Instance.RemoveListener<OnPlayerMaxHealthChanged>(UpdateMaximumHealth);
-            }
+            EventManager.Instance.RemoveListener<OnPlayerHealthChanged>(UpdateHealth);
+            EventManager.Instance.RemoveListener<OnPlayerMaxHealthChanged>(UpdateMaximumHealth);
         }
     }
 }

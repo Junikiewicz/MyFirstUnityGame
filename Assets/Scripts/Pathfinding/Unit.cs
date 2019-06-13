@@ -31,8 +31,8 @@ namespace MyRPGGame.PathFinding
             {
                 path = new Path(waypoints, obtainThisPosition(), turnDst, stoppingDst);
                 pathPossible = true;
-                StopCoroutine("FollowPath");
-                StartCoroutine("FollowPath");
+                StopCoroutine(nameof(FollowPath));
+                StartCoroutine(nameof(FollowPath));
             }
             else
             {
@@ -73,7 +73,6 @@ namespace MyRPGGame.PathFinding
                 }
                 yield return null;
             }
-
         }
         public void OnDrawGizmos()
         {

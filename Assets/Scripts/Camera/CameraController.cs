@@ -6,10 +6,11 @@ namespace MyRPGGame.Camera
 {
     public class CameraController : MonoBehaviour
     {
-        public float shakeMagnitude, shakeTime;
+        [SerializeField] private float shakeMagnitude, shakeTime;
+
+        private readonly Vector3 cameraOffset = new Vector3(0, 0, -1);
 
         private bool shaking;
-        private readonly Vector3 offset = new Vector3(0, 0, -10);
         private static CameraController instance;
 
         private void Start()
@@ -29,7 +30,7 @@ namespace MyRPGGame.Camera
         {
             if (PlayerController.Instance != null)
             {
-                transform.position = PlayerController.Instance.GetCurrentPlayerPosition() + offset;
+                transform.position = PlayerController.Instance.GetCurrentPlayerPosition() + cameraOffset;
             }
             if (shaking)
             {
@@ -38,7 +39,7 @@ namespace MyRPGGame.Camera
                 transform.position = transform.position + Vector3.right * cameraShakingOffsetX + Vector3.up * cameraShakingOffsetY;
             }
         }
-        private void ShakeIt(OnPlayerHit data)
+        private void ShakeIt(OnPlayerHit eventData)
         {
             shaking = true;
             Invoke(nameof(StopCameraShaking), shakeTime);

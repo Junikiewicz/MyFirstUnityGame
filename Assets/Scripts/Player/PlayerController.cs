@@ -7,9 +7,9 @@ namespace MyRPGGame.Player
 {
     public class PlayerController : MonoBehaviour
     {
-        public AudioSource gotHit;
-        public AudioSource heavyBreathing;
-        public AudioSource death;
+        [SerializeField] private AudioSource gotHit;
+        [SerializeField] private AudioSource heavyBreathing;
+        [SerializeField] private AudioSource death;
 
         private PlayerStatisticsController playerStats;
         private Rigidbody2D playerRigibody2D;
@@ -22,6 +22,24 @@ namespace MyRPGGame.Player
         private Vector2 velocity;
         private float timeDelayForHoldingSpace;
         private bool pause = true;
+
+        //input
+        private const string SprintButton = "Sprint";
+        private const string AttackButton = "Attack";
+        private const string InputHorizontalAxis = "Horizontal";
+        private const string InputVerticalAxis = "Vertical";
+
+        //animator
+        private const string AnimatorDeathTrigger = "Death";
+        private const string AttackAnimationTag = "Attack";
+        private const string SprintAnimatorParametr = "Running";
+        private const string XAnimatorParametr = "X";
+        private const string YAnimatorParametr = "Y";
+        private const string LastXAnimatorParametr = "LastX";
+        private const string LastYAnimatorParametr = "LastY";
+        private const string AttackBufferAnimatorParametr = "AttackBuffor";
+
+
         public static PlayerController Instance { get; private set; }
         public Vector3 GetCurrentPlayerPosition()//hotfix due to wrongly placed pivot in 500+ sprites. Will be fixed as soon as i get sorting groups right.
         {
@@ -36,26 +54,12 @@ namespace MyRPGGame.Player
                 playerStats = GetComponent<PlayerStatisticsController>();
                 playerAnimator = GetComponent<Animator>();
                 playerRigibody2D = GetComponent<Rigidbody2D>();
-                if (playerRigibody2D && playerStats && playerAnimator)
-                {
-                    if (EventManager.Instance)
-                    {
-                        EventManager.Instance.AddListener<OnPlayerKilled>(PlayerKillied);
-                        EventManager.Instance.AddListener<OnPlayerExhausted>(PlayerExhaustion);
-                        EventManager.Instance.AddListener<OnPauseStart>(StartPause);
-                        EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
-                        EventManager.Instance.AddListener<OnPlayerTeleportation>(TeleportPlayer);
-                    }
-                    else
-                    {
-                        Debug.LogError(GetType() + " couldn't find EventManager.");
-                    }
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find one of its required components");
-                    enabled = false;
-                }
+
+                EventManager.Instance.AddListener<OnPlayerKilled>(PlayerKillied);
+                EventManager.Instance.AddListener<OnPlayerExhausted>(PlayerExhaustion);
+                EventManager.Instance.AddListener<OnPauseStart>(StartPause);
+                EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
+                EventManager.Instance.AddListener<OnPlayerTeleportation>(TeleportPlayer);
             }
             else
             {
@@ -79,7 +83,7 @@ namespace MyRPGGame.Player
         }
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if(collision.attachedRigidbody&&collision.isTrigger)
+            if (collision.attachedRigidbody && collision.isTrigger)
             {
                 IDamageDealer damageDealer = collision.attachedRigidbody.GetComponent<IDamageDealer>();
                 if (damageDealer != null)
@@ -95,15 +99,15 @@ namespace MyRPGGame.Player
         {
             if (!attacking)
             {
-                velocity.x = Input.GetAxisRaw("Horizontal") * (float)playerStats.GetPlayerStat(typeof(Speed));
-                velocity.y = Input.GetAxisRaw("Vertical") * (float)playerStats.GetPlayerStat(typeof(Speed));
+                velocity.x = Input.GetAxisRaw(InputHorizontalAxis) * (float)playerStats.GetPlayerStat(typeof(Speed));
+                velocity.y = Input.GetAxisRaw(InputVerticalAxis) * (float)playerStats.GetPlayerStat(typeof(Speed));
             }
             else
             {
                 velocity.x = 0;
                 velocity.y = 0;
             }
-            if (Input.GetButton("Sprint") && !exhausted && (velocity.x != 0 || velocity.y != 0))
+            if (Input.GetButton(SprintButton) && !exhausted && (velocity.x != 0 || velocity.y != 0))
             {
                 sprinting = true;
                 playerStats.ChangeStamina(-4);
@@ -114,19 +118,19 @@ namespace MyRPGGame.Player
                 sprinting = false;
             }
 
-            playerAnimator.SetBool("Running", sprinting);
-            playerAnimator.SetFloat("Y", velocity.y);
-            playerAnimator.SetFloat("X", velocity.x);
+            playerAnimator.SetBool(SprintAnimatorParametr, sprinting);
+            playerAnimator.SetFloat(YAnimatorParametr, velocity.y);
+            playerAnimator.SetFloat(XAnimatorParametr, velocity.x);
             if (velocity.x != 0 || velocity.y != 0)
             {
-                playerAnimator.SetFloat("LastX", velocity.x);
-                playerAnimator.SetFloat("LastY", velocity.y);
+                playerAnimator.SetFloat(LastXAnimatorParametr, velocity.x);
+                playerAnimator.SetFloat(LastYAnimatorParametr, velocity.y);
             }
         }
         private void PlayerAttack()
         {
             timeDelayForHoldingSpace += Time.deltaTime;
-            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag))
             {
                 attacking = true;
             }
@@ -135,7 +139,7 @@ namespace MyRPGGame.Player
                 attacking = false;
                 attackBuffor = 0;
             }
-            if ((Input.GetButtonDown("Attack") || (Input.GetButton("Attack") && timeDelayForHoldingSpace > 0.3f)) &&
+            if ((Input.GetButtonDown(AttackButton) || (Input.GetButton(AttackButton) && timeDelayForHoldingSpace > 0.3f)) &&
               playerStats.GetPlayerStat(typeof(Stamina)) > 50 &&
               attackBuffor < 3)
             {
@@ -143,49 +147,46 @@ namespace MyRPGGame.Player
                 attackBuffor++;
                 timeDelayForHoldingSpace = 0;
             }
-            playerAnimator.SetInteger("AttackBuffor", attackBuffor);
+            playerAnimator.SetInteger(AttackBufferAnimatorParametr, attackBuffor);
         }
-        private void StartPause(OnPauseStart data)
+        private void StartPause(OnPauseStart eventData)
         {
             playerRigibody2D.velocity = Vector3.zero;
             pause = true;
         }
-        private void EndPause(OnPauseEnd data)
+        private void EndPause(OnPauseEnd eventData)
         {
             pause = false;
         }
-        private void PlayerExhaustion(OnPlayerExhausted Data)
+        private void PlayerExhaustion(OnPlayerExhausted eventData)
         {
             exhausted = true;
             heavyBreathing.Play();
-            Invoke("PlayerRested", 2);
+            Invoke(nameof(PlayerRested), 2);
         }
         private void PlayerRested()
         {
             exhausted = false;
         }
-        private void PlayerKillied(OnPlayerKilled data)
+        private void PlayerKillied(OnPlayerKilled eventData)
         {
-            playerAnimator.SetTrigger("Death");
+            playerAnimator.SetTrigger(AnimatorDeathTrigger);
             death.Play();
         }
-        private void TeleportPlayer(OnPlayerTeleportation data)
+        private void TeleportPlayer(OnPlayerTeleportation eventData)
         {
-            transform.position = data.destination;
+            transform.position = eventData.destination;
         }
         private void OnDestroy()
         {
             if (Instance == this)
             {
                 Instance = null;
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.RemoveListener<OnPlayerExhausted>(PlayerExhaustion);
-                    EventManager.Instance.RemoveListener<OnPauseStart>(StartPause);
-                    EventManager.Instance.RemoveListener<OnPauseEnd>(EndPause);
-                    EventManager.Instance.RemoveListener<OnPlayerKilled>(PlayerKillied);
-                    EventManager.Instance.RemoveListener<OnPlayerTeleportation>(TeleportPlayer);
-                }
+                EventManager.Instance.RemoveListener<OnPlayerExhausted>(PlayerExhaustion);
+                EventManager.Instance.RemoveListener<OnPauseStart>(StartPause);
+                EventManager.Instance.RemoveListener<OnPauseEnd>(EndPause);
+                EventManager.Instance.RemoveListener<OnPlayerKilled>(PlayerKillied);
+                EventManager.Instance.RemoveListener<OnPlayerTeleportation>(TeleportPlayer);
             }
         }
     }

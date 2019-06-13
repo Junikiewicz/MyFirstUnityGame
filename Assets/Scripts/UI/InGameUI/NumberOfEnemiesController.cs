@@ -6,36 +6,18 @@ namespace MyRPGGame.UI
 {
     public class NumberOfEnemiesController : MonoBehaviour
     {
-        public Text numberOfEnemies;
+        [SerializeField] private Text numberOfEnemies;
         private void Awake()
         {
-            if (numberOfEnemies)
-            {
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnNumberOfEnemiesChanged>(UpdateNumberOfEnemies);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its graphics components");
-            }
+            EventManager.Instance.AddListener<OnNumberOfEnemiesChanged>(UpdateNumberOfEnemies);
         }
-        private void UpdateNumberOfEnemies(OnNumberOfEnemiesChanged eventDate)
+        private void UpdateNumberOfEnemies(OnNumberOfEnemiesChanged eventData)
         {
-            numberOfEnemies.text = eventDate.numberOfEnemies.ToString();
+            numberOfEnemies.text = eventData.numberOfEnemies.ToString();
         }
         private void OnDestroy()
         {
-
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnNumberOfEnemiesChanged>(UpdateNumberOfEnemies);
-            }
+            EventManager.Instance.RemoveListener<OnNumberOfEnemiesChanged>(UpdateNumberOfEnemies);
         }
     }
 }

@@ -9,24 +9,8 @@ namespace MyRPGGame.UI
         public InputField characterNameInput;
         public void StartNewGame()
         {
-            if(EventManager.Instance)
-            {
-                EventManager.Instance.TriggerEvent(new OnNewGame(characterNameInput.text));
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find EventManager.");
-            }
-
-            if (MainMenuController.Instance)
-            {
-                MainMenuController.Instance.CloseMainMenu();
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find MainMenuController.");
-            }
-
+            EventManager.Instance.TriggerEvent(new OnNewGame(characterNameInput.text));
+            MainMenuController.Instance.CloseMainMenu();
         }
     }
 

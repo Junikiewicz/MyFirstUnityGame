@@ -8,21 +8,25 @@ namespace MyRPGGame.World
 {
     public class WorldGeneration : MonoBehaviour
     {
-        enum Direction { Right, Top, Left, Down };
+        private enum Direction { Right, Top, Left, Down };
+
+        [SerializeField] public Tilemap groundMap;
+        [SerializeField] private Tilemap waterMap;
+        [SerializeField] private Tilemap objectsMap;
+        private const string BuildingsPrefabsCatalog = "MapObjects/Buildings";
+        private const string TressPrefabsCatalog = "MapObjects/Tress";
+        private const string ExtrasPrefabCatalog = "MapObjects/Extras";
+
+        [SerializeField] private Tile waterTile;
+        [SerializeField] private RuleTile groundTile;
+
+        [SerializeField] private List<GameObject> enemyTypes;
+
+        private int siezeOfTheMap;
+        private int numberOfEnemiesToSpawn;
+        private Vector3Int position = new Vector3Int(0, 0, 0);
 
         static WorldGeneration _instance;
-        public Tilemap groundMap;
-        public Tilemap waterMap;
-        public Tilemap objectsMap;
-
-        public List<GameObject> enemies;
-        public Tile waterTile;
-
-        public RuleTile groundTile;
-
-        private int size;
-        private int numberOfEnemies;
-        private Vector3Int position = new Vector3Int(0, 0, 0);
 
         public static WorldGeneration Instance
         {
@@ -35,15 +39,12 @@ namespace MyRPGGame.World
                 return _instance;
             }
         }
-
         public void StartGeneratingWorld(int _size, int _numberOfEnemies)
         {
-            Debug.Log("Starting world generation.");
-            size = _size;
-            numberOfEnemies = _numberOfEnemies;
+            siezeOfTheMap = _size;
+            numberOfEnemiesToSpawn = _numberOfEnemies;
             Invoke(nameof(GenerateWorld), 0.1f);
         }
-
         private void GenerateWorld()
         {
             groundMap.ClearAllTiles();
@@ -56,19 +57,18 @@ namespace MyRPGGame.World
             }
             groundMap.FloodFill(position, groundTile);
 
-            waterMap.origin = new Vector3Int(-2 * size, -2 * size, 0);
-            waterMap.size = new Vector3Int(4 * size, 3 * size, 0);
+            waterMap.origin = new Vector3Int(-2 * siezeOfTheMap, -2 * siezeOfTheMap, 0);
+            waterMap.size = new Vector3Int(4 * siezeOfTheMap, 3 * siezeOfTheMap, 0);
             waterMap.FloodFill(waterMap.origin, waterTile);
 
-            PlaceObjects(size / 2, 3, "MapObjects/Buildings");
-            PlaceObjects(size, 2, "MapObjects/Tress");
-            PlaceObjects(8 * size, 1, "MapObjects/Extras");
+            PlaceObjects(siezeOfTheMap / 2, 3, BuildingsPrefabsCatalog);
+            PlaceObjects(siezeOfTheMap, 2, TressPrefabsCatalog);
+            PlaceObjects(8 * siezeOfTheMap, 1, ExtrasPrefabCatalog);
             SpawnEnemies();
             SpawnPlayer();
 
-            Debug.Log("World generated.");
-            //Aparently we need to wait one frame in order to colliders apear
-            Invoke(nameof(CreateNodeGrid), Time.deltaTime);
+            //Wait for Physics
+            Invoke(nameof(CreateNodeGrid), Time.fixedDeltaTime);
         }
         private void MakeEdges()
         {
@@ -78,18 +78,18 @@ namespace MyRPGGame.World
             {
                 Move(RandomWithoutOneDirection(Direction.Right));
                 groundMap.SetTile(position, waterTile);
-            } while (position.x > -size);
+            } while (position.x > -siezeOfTheMap);
             do
             {
                 Move(RandomWithoutOneDirection(Direction.Top));
                 groundMap.SetTile(position, waterTile);
-            } while (position.y > -size);
+            } while (position.y > -siezeOfTheMap);
 
             do
             {
                 Move(RandomWithoutOneDirection(Direction.Left));
                 groundMap.SetTile(position, waterTile);
-            } while (position.x < size);
+            } while (position.x < siezeOfTheMap);
 
             do
             {
@@ -102,7 +102,7 @@ namespace MyRPGGame.World
             {
                 Move(RandomWithoutOneDirection(Direction.Right));
                 groundMap.SetTile(position, waterTile);
-            } while (position.x > size / 6);
+            } while (position.x > siezeOfTheMap / 6);
             GoToStart();
         }
         private Direction RandomWithoutOneDirection(Direction withoutWhat)
@@ -157,8 +157,8 @@ namespace MyRPGGame.World
                 count = 0;
                 do
                 {
-                    position.x = Random.Range(-2 * size, 2 * size);
-                    position.y = Random.Range(-2 * size, size);
+                    position.x = Random.Range(-2 * siezeOfTheMap, 2 * siezeOfTheMap);
+                    position.y = Random.Range(-2 * siezeOfTheMap, siezeOfTheMap);
                     count++;
                 }
                 while (!(CheckIfPositionPossible(distance, (x) => (objectsMap.GetTile(x) != null) || (groundMap.GetTile(x) != groundTile))) && count < 2000);
@@ -168,8 +168,7 @@ namespace MyRPGGame.World
                 }
                 else
                 {
-                    Debug.Log("World Generator wasn't able to find a free spot for all " + directoryName + " propably due to the lack of space.");
-                    break;
+                    break;//propably not enough space
                 }
             }
         }
@@ -193,23 +192,23 @@ namespace MyRPGGame.World
         }
         private void SpawnEnemies()
         {
-            for (int i = 0; i < numberOfEnemies; i++)
+            for (int i = 0; i < numberOfEnemiesToSpawn; i++)
             {
                 do
                 {
-                    position.x = Random.Range(-2 * size, 2 * size);
-                    position.y = Random.Range(-2 * size, size);
+                    position.x = Random.Range(-2 * siezeOfTheMap, 2 * siezeOfTheMap);
+                    position.y = Random.Range(-2 * siezeOfTheMap, siezeOfTheMap);
                 } while (!CheckIfPositionPossible(5, (x) => groundMap.GetTile(x) != groundTile));
 
-                GameObject newEnemy = Instantiate(enemies[Random.Range(0, enemies.Count)], position, Quaternion.identity);
+                GameObject newEnemy = Instantiate(enemyTypes[Random.Range(0, enemyTypes.Count)], position, Quaternion.identity);
             }
         }
         private void SpawnPlayer()
         {
             do
             {
-                position.x = Random.Range(-2 * size, 2 * size);
-                position.y = Random.Range(-2 * size, size);
+                position.x = Random.Range(-2 * siezeOfTheMap, 2 * siezeOfTheMap);
+                position.y = Random.Range(-2 * siezeOfTheMap, siezeOfTheMap);
             } while (!CheckIfPositionPossible(5, (x) => groundMap.GetTile(x) != groundTile));
             EventManager.Instance.TriggerEvent(new OnPlayerTeleportation(position));
         }

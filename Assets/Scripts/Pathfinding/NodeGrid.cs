@@ -21,7 +21,6 @@ namespace MyRPGGame.PathFinding
 
         public void CreateNodeGrid()
         {
-            Debug.Log("Starting pathfinding nodeGrid generation.");
             worldBottomLeft = GetComponent<WorldGeneration>().groundMap.origin;
             gridWorldSize = new Vector2(GetComponent<WorldGeneration>().groundMap.size.x, GetComponent<WorldGeneration>().groundMap.size.y);
             worldCenter = new Vector3(worldBottomLeft.x + gridWorldSize.x / 2, worldBottomLeft.y + gridWorldSize.y / 2);
@@ -30,7 +29,6 @@ namespace MyRPGGame.PathFinding
             gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
             gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
             CreateGrid();
-            Debug.Log("Pathfinding nodeGrid generated.");
         }
 
         public int MaxSize

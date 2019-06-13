@@ -9,26 +9,18 @@ namespace MyRPGGame.Enemies
     }
     public class SpritesChanger : MonoBehaviour
     {
-        public EnemyClass characterClass;
-        Sprite newSprite;
-        string spriteName;
-        SpriteRenderer spriteRenderer;
-        Sprite[] subSprites;
+        private EnemyClass characterClass;
+        private Sprite newSprite;
+        private string spriteName;
+        private SpriteRenderer spriteRenderer;
+        private Sprite[] subSprites;
 
         private void Start()
         {
             Enemy enemy = GetComponent<Enemy>();
             spriteRenderer = GetComponent<SpriteRenderer>();
-            if (spriteRenderer&&enemy)
-            {
-                characterClass = enemy.characterClass;
-                subSprites = Resources.LoadAll<Sprite>("Characters/" + characterClass.ToString());
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its required components");
-                enabled = false;
-            }
+            characterClass = enemy.characterClass;
+            subSprites = Resources.LoadAll<Sprite>("Characters/" + characterClass.ToString());
         }
 
         void LateUpdate()

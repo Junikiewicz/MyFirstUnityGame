@@ -5,7 +5,8 @@ namespace MyRPGGame.Enemies
 {
     public class Mage : Enemy
     {
-        public GameObject fireball;
+        [SerializeField] private GameObject fireball;
+        private const string AnimatorSpellcastTrigger = "SpellCast";
         protected override void Awake()
         {
             base.Awake();
@@ -18,24 +19,10 @@ namespace MyRPGGame.Enemies
         protected override void Attack()
         {
             base.Attack();
-            theAn.SetTrigger("SpellCast");
-            if(fireball)
-            {
-                GameObject missile = Instantiate(fireball, transform.position, Quaternion.identity);
-                FireBall fireballComponent = missile.GetComponent<FireBall>();
-                if(fireball)
-                {
-                    fireballComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find fireballComponent on prefab.");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find fireball prefab.");
-            }
+            theAn.SetTrigger(AnimatorSpellcastTrigger);
+            GameObject missile = Instantiate(fireball, transform.position, Quaternion.identity);
+            FireBall fireballComponent = missile.GetComponent<FireBall>();
+            fireballComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
         }
     }
 }

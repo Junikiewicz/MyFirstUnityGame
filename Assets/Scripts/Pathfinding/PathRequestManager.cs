@@ -6,8 +6,6 @@ namespace MyRPGGame.PathFinding
 {
     public class PathRequestManager : MonoBehaviour
     {
-
-
         static PathRequestManager instance;
         Pathfinding pathfinding;
 
@@ -21,15 +19,11 @@ namespace MyRPGGame.PathFinding
 
         public static void RequestPath(PathRequest request)
         {
-
-
             ThreadStart threadStart = delegate
             {
                 instance.pathfinding.FindPath(request, instance.FinishedProcessingPath);
             };
             threadStart.Invoke();
-
-
         }
         private void Update()
         {
@@ -48,16 +42,13 @@ namespace MyRPGGame.PathFinding
         }
         public void FinishedProcessingPath(PathResult result)
         {
-
             lock (results)
             {
                 results.Enqueue(result);
             }
-
         }
-
-
     }
+
     public struct PathRequest
     {
         public Vector3 pathStart;

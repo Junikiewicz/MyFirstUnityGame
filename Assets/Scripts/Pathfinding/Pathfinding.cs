@@ -5,14 +5,11 @@ namespace MyRPGGame.PathFinding
 {
     public class Pathfinding : MonoBehaviour
     {
-
         NodeGrid grid;
-
         void Awake()
         {
             grid = GetComponent<NodeGrid>();
         }
-
         public void FindPath(PathRequest request, Action<PathResult> callback)
         {
 
@@ -63,13 +60,11 @@ namespace MyRPGGame.PathFinding
                     }
                 }
             }
-
             if (pathSuccess)
             {
                 waypoints = RetracePath(startNode, targetNode);
             }
             callback(new PathResult(waypoints, pathSuccess, request.callback));
-
         }
 
         Vector3[] RetracePath(Node startNode, Node endNode)
@@ -85,9 +80,7 @@ namespace MyRPGGame.PathFinding
             Vector3[] waypoints = SimplifyPath(path);
             Array.Reverse(waypoints);
             return waypoints;
-
         }
-
         Vector3[] SimplifyPath(List<Node> path)
         {
             List<Vector3> waypoints = new List<Vector3>();

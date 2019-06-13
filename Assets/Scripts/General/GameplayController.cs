@@ -10,45 +10,41 @@ namespace MyRPGGame
 {
     public class GameplayController : MonoBehaviour
     {
-        public static GameplayController Instance { get; private set; }
-        public string playerName;
+        [SerializeField] private GameObject portal;
+        [SerializeField] private string startingScene = "Dungeon";
+        private const string dateFormatForSave = "dd-MM-yyyy HH:mm:ss";
+
+        private string playerName;
         public int currentWorldLevel = 1;
         private bool gameEnded = false;
-        public GameObject portal;
+        public static GameplayController Instance { get; private set; }
         private void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
                 DontDestroyOnLoad(this);
-                if(EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnPlayerKilled>(PlayerDeath);
-                    EventManager.Instance.AddListener<OnLevelCompleted>(AllEnemiesKilled);
-                    EventManager.Instance.AddListener<OnPortalEntered>(EnterPortal);
-                    EventManager.Instance.AddListener<OnDungeonLeft>(LeaveDungeon);
-                    EventManager.Instance.AddListener<OnNewGame>(StartNewGame);
-                    EventManager.Instance.AddListener<OnGameLoaded>(LoadDataFromSave);
-                    EventManager.Instance.AddListener<OnGameSaved>(AddAdditionalDataToSave);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
+                EventManager.Instance.AddListener<OnPlayerKilled>(PlayerDeath);
+                EventManager.Instance.AddListener<OnLevelCompleted>(AllEnemiesKilled);
+                EventManager.Instance.AddListener<OnPortalEntered>(EnterPortal);
+                EventManager.Instance.AddListener<OnDungeonLeft>(LeaveDungeon);
+                EventManager.Instance.AddListener<OnNewGame>(StartNewGame);
+                EventManager.Instance.AddListener<OnGameLoaded>(LoadDataFromSave);
+                EventManager.Instance.AddListener<OnGameSaved>(AddAdditionalDataToSave);
             }
             else
             {
                 Destroy(gameObject);//Prevent object duplicates when switching scenes
             }
         }
-        private void StartNewGame(OnNewGame Data)
+        private void StartNewGame(OnNewGame eventData)
         {
             gameEnded = false;
-            SceneManager.LoadScene("Dungeon");
-            EventManager.Instance.TriggerEvent(new OnPlayerTeleportation(new Vector3(0, 11, 0)));
-            playerName =Data.CharacterName;
+            SceneManager.LoadScene(startingScene);
+            playerName = eventData.CharacterName;
             currentWorldLevel = 1;
             Enemy.numberOfEnemies = 0;
+            EventManager.Instance.TriggerEvent(new OnPlayerTeleportation(new Vector3(0, 11, 0)));
             EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(0));
             EventManager.Instance.TriggerEvent(new OnPauseEnd());
         }
@@ -60,7 +56,7 @@ namespace MyRPGGame
         {
             WorldGeneration.Instance.StartGeneratingWorld(30, currentWorldLevel * 10);
         }
-        private void AllEnemiesKilled(OnLevelCompleted Data)
+        private void AllEnemiesKilled(OnLevelCompleted eventData)
         {
             if (!gameEnded)
             {
@@ -69,33 +65,32 @@ namespace MyRPGGame
                 Instantiate(portal, temp, Quaternion.identity);
             }
         }
-        private void EnterPortal(OnPortalEntered Data)
+        private void EnterPortal(OnPortalEntered eventData)
         {
             Enemy.numberOfEnemies = 0;
             currentWorldLevel++;
             EventManager.Instance.TriggerEvent(new OnPlayerTeleportation(new Vector3(0, 11, 0)));
             SaveManager.Instance.SaveGame(playerName);
         }
-        private void PlayerDeath(OnPlayerKilled Data)
+        private void PlayerDeath(OnPlayerKilled eventData)
         {
             gameEnded = true;
             EventManager.Instance.TriggerEvent(new OnPauseStart());
         }
-        private void AddAdditionalDataToSave(OnGameSaved data)
+        private void AddAdditionalDataToSave(OnGameSaved eventData)
         {
-            data.saveData.worldLvl = currentWorldLevel;
-            data.saveData.date = System.DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
-            data.saveData.playerName = playerName;
+            eventData.saveData.worldLvl = currentWorldLevel;
+            eventData.saveData.date = System.DateTime.Now.ToString(dateFormatForSave);
+            eventData.saveData.playerName = playerName;
         }
-
-        private void LoadDataFromSave(OnGameLoaded data)
+        private void LoadDataFromSave(OnGameLoaded eventData)
         {
             EventManager.Instance.TriggerEvent(new OnPauseEnd());
-            currentWorldLevel = data.saveData.worldLvl;
-            playerName = data.saveData.playerName;
+            currentWorldLevel = eventData.saveData.worldLvl;
+            playerName = eventData.saveData.playerName;
 
             gameEnded = false;
-            SceneManager.LoadScene("Dungeon");
+            SceneManager.LoadScene(startingScene);
             Enemy.numberOfEnemies = 0;
             EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(0));
             EventManager.Instance.TriggerEvent(new OnPlayerTeleportation(new Vector3(0, 11, 0)));
@@ -105,16 +100,13 @@ namespace MyRPGGame
             if (Instance == this)
             {
                 Instance = null;
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.RemoveListener<OnPlayerKilled>(PlayerDeath);
-                    EventManager.Instance.RemoveListener<OnLevelCompleted>(AllEnemiesKilled);
-                    EventManager.Instance.RemoveListener<OnPortalEntered>(EnterPortal);
-                    EventManager.Instance.RemoveListener<OnDungeonLeft>(LeaveDungeon);
-                    EventManager.Instance.RemoveListener<OnNewGame>(StartNewGame);
-                    EventManager.Instance.RemoveListener<OnGameLoaded>(LoadDataFromSave);
-                    EventManager.Instance.RemoveListener<OnGameSaved>(AddAdditionalDataToSave);
-                }
+                EventManager.Instance.RemoveListener<OnPlayerKilled>(PlayerDeath);
+                EventManager.Instance.RemoveListener<OnLevelCompleted>(AllEnemiesKilled);
+                EventManager.Instance.RemoveListener<OnPortalEntered>(EnterPortal);
+                EventManager.Instance.RemoveListener<OnDungeonLeft>(LeaveDungeon);
+                EventManager.Instance.RemoveListener<OnNewGame>(StartNewGame);
+                EventManager.Instance.RemoveListener<OnGameLoaded>(LoadDataFromSave);
+                EventManager.Instance.RemoveListener<OnGameSaved>(AddAdditionalDataToSave);
             }
         }
     }

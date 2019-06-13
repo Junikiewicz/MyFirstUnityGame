@@ -6,44 +6,26 @@ namespace MyRPGGame.UI
 {
     public class StaminaOrbController : MonoBehaviour
     {
-        public Image staminaOrb;
-        public Text staminaAmount;
+        [SerializeField] private Image staminaOrb;
+        [SerializeField] private Text staminaAmount;
 
-        float currentStamina;
-        float maximumStamina;
-
-
+        private float currentStamina;
+        private float maximumStamina;
         private void Awake()
         {
-            if (staminaAmount && staminaOrb)
-            {
-                if (EventManager.Instance)
-                {
-                    EventManager.Instance.AddListener<OnPlayerStaminaChanged>(UpdateStamina);
-                    EventManager.Instance.AddListener<OnPlayerMaxStaminaChanged>(UpdateMaximumStamina);
-                }
-                else
-                {
-                    Debug.LogError(GetType() + " couldn't find EventManager.");
-                }
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find one of its graphics components");
-            }
+            EventManager.Instance.AddListener<OnPlayerStaminaChanged>(UpdateStamina);
+            EventManager.Instance.AddListener<OnPlayerMaxStaminaChanged>(UpdateMaximumStamina);
         }
-        private void UpdateStamina(OnPlayerStaminaChanged test)
+        private void UpdateStamina(OnPlayerStaminaChanged eventData)
         {
-            currentStamina = (float)test.CurrentStamina;
+            currentStamina = (float)eventData.CurrentStamina;
             UpdateOrb();
         }
-
-        private void UpdateMaximumStamina(OnPlayerMaxStaminaChanged test)
+        private void UpdateMaximumStamina(OnPlayerMaxStaminaChanged eventData)
         {
-            maximumStamina = (float)test.MaximumStamina;
+            maximumStamina = (float)eventData.MaximumStamina;
             UpdateOrb();
         }
-
         private void UpdateOrb()
         {
             staminaOrb.fillAmount = currentStamina / maximumStamina;
@@ -51,11 +33,8 @@ namespace MyRPGGame.UI
         }
         private void OnDestroy()
         {
-            if (EventManager.Instance)
-            {
-                EventManager.Instance.RemoveListener<OnPlayerStaminaChanged>(UpdateStamina);
-                EventManager.Instance.RemoveListener<OnPlayerMaxStaminaChanged>(UpdateMaximumStamina);
-            }
+            EventManager.Instance.RemoveListener<OnPlayerStaminaChanged>(UpdateStamina);
+            EventManager.Instance.RemoveListener<OnPlayerMaxStaminaChanged>(UpdateMaximumStamina);
         }
     }
 }

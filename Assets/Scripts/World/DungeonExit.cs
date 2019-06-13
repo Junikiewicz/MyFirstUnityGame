@@ -1,4 +1,5 @@
 ﻿using MyRPGGame.Events;
+using MyRPGGame.Player;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,13 +7,16 @@ namespace MyRPGGame.World
 {
     public class DungeonExit : MonoBehaviour
     {
-        public string destinationScene="World";
+        [SerializeField] private string destinationScene="World";
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.gameObject.tag == "Player")
+            if (collision.attachedRigidbody)
             {
-                SceneManager.LoadScene(destinationScene);
-                EventManager.Instance.TriggerEvent(new OnDungeonLeft());
+                if(collision.attachedRigidbody.GetComponent<PlayerController>())
+                {
+                    SceneManager.LoadScene(destinationScene);
+                    EventManager.Instance.TriggerEvent(new OnDungeonLeft());
+                }
             }
         }
     }

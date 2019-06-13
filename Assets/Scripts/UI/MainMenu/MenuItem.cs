@@ -2,7 +2,7 @@
 
 namespace MyRPGGame.UI
 {
-    public abstract class MenuItem:MonoBehaviour
+    public abstract class MenuItem : MonoBehaviour
     {
         public virtual void Hide()
         {
@@ -16,15 +16,7 @@ namespace MyRPGGame.UI
 
         public virtual void OpenMenuItem()
         {
-            if(MainMenuController.Instance)
-            {
-                MainMenuController.Instance.AddNewElementOnTop(this);
-            }
-            else
-            {
-                Debug.LogError(GetType() + " couldn't find MainMenuController.");
-            }
-            
+            MainMenuController.Instance.AddNewElementOnTop(this);
         }
     }
 }

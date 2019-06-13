@@ -1,20 +1,21 @@
 ﻿using MyRPGGame.Player;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace MyRPGGame.Collectables
 {
     public abstract class Collectable : MonoBehaviour
     {
-        float speed = 5;
-        bool moving;
-        float lifeTime = 0;
-        protected SpriteRenderer spriteRenderer;
         public double value;
-        Rigidbody2D collectableRigidbody;
-        Vector3 target;
+
+        [SerializeField]private float speed = 5;
+        [SerializeField]private float inactivityTimer = 0.2f;
+
+        private bool moving;
+        private Vector3 target;
+
         protected AudioSource audioSource;
+        private Rigidbody2D collectableRigidbody;
+        protected SpriteRenderer spriteRenderer;
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
@@ -23,18 +24,23 @@ namespace MyRPGGame.Collectables
         }
         void Update()
         {
-            lifeTime += Time.deltaTime;
-            target = PlayerController.Instance.GetCurrentPlayerPosition();
-            if (lifeTime>0.2f&&Vector3.Distance(transform.position,target)<5)
+            if(inactivityTimer>0)
             {
-                moving = true;
+                inactivityTimer -= Time.deltaTime;
             }
             else
             {
-                moving = false;
+                target = PlayerController.Instance.GetCurrentPlayerPosition();
+                if (Vector3.Distance(transform.position, target) < 5)
+                {
+                    moving = true;
+                }
+                else
+                {
+                    moving = false;
+                }
             }
         }
-
         private void FixedUpdate()
         {
             if(moving)
