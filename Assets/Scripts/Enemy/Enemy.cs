@@ -39,6 +39,7 @@ namespace MyRPGGame.Enemies
 
         private int animatorX;
         private int animatorY;
+        private const string AnimatorDieTrigger = "Die";
         private const string AttackAnimationTag = "Attack";
         private const string XAnimatorParametr = "X";
         private const string YAnimatorParametr = "Y";
@@ -57,7 +58,7 @@ namespace MyRPGGame.Enemies
         public double DealDamage()//used by player
         {
             double basicDamage = stats.GetStat(Stat.AttackDamage);
-            return basicDamage+Random.Range((float)(-0.2*basicDamage),(float)(0.2*basicDamage));
+            return basicDamage + Random.Range((float)(-0.2 * basicDamage), (float)(0.2 * basicDamage));
         }
 
         protected virtual void Awake()
@@ -66,31 +67,41 @@ namespace MyRPGGame.Enemies
             audioSource = GetComponent<AudioSource>();
             stats = gameObject.AddComponent<StatBlock>();
             theAn = GetComponent<Animator>();
+
             pathfindingUnit = GetComponent<Unit>();
-            if (PlayerController.Instance)
-            {
-                pathfindingUnit.Inicialize(PlayerController.Instance.GetCurrentPlayerPosition, GetCurrentEnemyPosition);
-            }
+            pathfindingUnit.Inicialize(PlayerController.Instance.GetCurrentPlayerPosition, GetCurrentEnemyPosition);
+
             EventManager.Instance.AddListener<OnPauseStart>(StartPause);
             EventManager.Instance.AddListener<OnPauseEnd>(EndPause);
-            numberOfEnemies++;
             EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(numberOfEnemies));
+            numberOfEnemies++;
         }
         protected virtual void Start()
         {
             int lvl = GameplayController.Instance.currentWorldLevel;
-            stats.AddStat(new Statistic(Stat.AttackDamage,enemyStatsTempalte.startingAttackDamage + lvl * enemyStatsTempalte.attackDamageAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.AttackSpeed,enemyStatsTempalte.startingAttackSpeed + lvl * enemyStatsTempalte.attackSpeedAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.Health,enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.Speed,enemyStatsTempalte.startingSpeed + lvl * enemyStatsTempalte.speedAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.AttackRange,enemyStatsTempalte.startingAttackRange + lvl * enemyStatsTempalte.attackRangeAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.SightRange,enemyStatsTempalte.startingSightRange + lvl * enemyStatsTempalte.sightRangeAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.MaximumHealth,enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
-            stats.AddStat(new Statistic(Stat.Lvl,lvl));
+
+            //calculating stats acording to the template
+            double attackDamage = enemyStatsTempalte.startingAttackDamage + lvl * enemyStatsTempalte.attackDamageAddedOnPromotion;
+            double attackSpeed = enemyStatsTempalte.startingAttackSpeed + lvl * enemyStatsTempalte.attackSpeedAddedOnPromotion;
+            double health = enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion;
+            double speed = enemyStatsTempalte.startingSpeed + lvl * enemyStatsTempalte.speedAddedOnPromotion;
+            double attackRange = enemyStatsTempalte.startingAttackRange + lvl * enemyStatsTempalte.attackRangeAddedOnPromotion;
+            double sightRange = enemyStatsTempalte.startingSightRange + lvl * enemyStatsTempalte.sightRangeAddedOnPromotion;
+            double maximumHealth = enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion;
+
+            //setting them
+            stats.AddStat(new Statistic(Stat.AttackDamage, attackDamage));
+            stats.AddStat(new Statistic(Stat.AttackSpeed, attackSpeed));
+            stats.AddStat(new Statistic(Stat.Health, health));
+            stats.AddStat(new Statistic(Stat.Speed, speed));
+            stats.AddStat(new Statistic(Stat.AttackRange, attackRange));
+            stats.AddStat(new Statistic(Stat.SightRange, sightRange));
+            stats.AddStat(new Statistic(Stat.MaximumHealth, maximumHealth));
+            stats.AddStat(new Statistic(Stat.Lvl, lvl));
         }
         private void Update()
         {
-            if(alive&&!pause)
+            if (alive && !pause)
             {
                 attacking = theAn.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag);
                 if (!attacking)
@@ -101,7 +112,7 @@ namespace MyRPGGame.Enemies
                     }
                     SimpleAI();
                 }
-                SetAnimations();
+                UpdateAnimations();
                 attackTimer += Time.deltaTime;
             }
         }
@@ -138,8 +149,9 @@ namespace MyRPGGame.Enemies
                 }
             }
         }
-        private void SetAnimations()
+        private void UpdateAnimations()
         {
+            //enemy sprites are 4-directional (instead of 8) so i'm making sure they are facing proper direction (without it there are some colliders bugs)
             if (Mathf.Abs(currentDirection.x) > Mathf.Abs(currentDirection.y))
             {
                 animatorX = currentDirection.x > 0 ? 1 : -1;
@@ -150,6 +162,7 @@ namespace MyRPGGame.Enemies
                 animatorX = 0;
                 animatorY = currentDirection.y > 0 ? 1 : -1;
             }
+
             theAn.SetFloat(LastXAnimatorParametr, animatorX);
             theAn.SetFloat(LastYAnimatorParametr, animatorY);
             if (moving)
@@ -166,7 +179,7 @@ namespace MyRPGGame.Enemies
 
         private void FixedUpdate()
         {
-            if (moving&&!attacking)
+            if (moving && !attacking)
             {
                 enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(Stat.Speed);
             }
@@ -176,18 +189,18 @@ namespace MyRPGGame.Enemies
             }
         }
 
-        IEnumerator RandomBehaviour()
+        IEnumerator RandomBehaviour()//cycle of standing and running in random direction
         {
             randomRunning = true;
             while (true)
             {
-                if(pathfindingUnit.active||pause)
+                if (pathfindingUnit.active || pause)
                 {
                     randomRunning = false;
                     yield break;
                 }
                 currentDirection = Random.insideUnitCircle;
-                if(moving)
+                if (moving)
                 {
                     moving = false;
                     yield return new WaitForSeconds(Random.Range(4, 5));
@@ -199,24 +212,21 @@ namespace MyRPGGame.Enemies
                 }
             }
         }
-        protected abstract void Attack();
+        protected abstract void Attack();//depends on enemy type
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (alive)
+            if (alive && collision.attachedRigidbody && collision.isTrigger)
             {
-                if (collision.attachedRigidbody && collision.isTrigger)
+                PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponent<PlayerStatisticsController>();
+                if (playerStatisticsController)
                 {
-                    PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponent<PlayerStatisticsController>();
-                    if (playerStatisticsController)
+                    double damageTaken = playerStatisticsController.DealDamage();
+                    audioSource.Play();
+                    TakeDamage(damageTaken);
+                    ShowDamageTaken(damageTaken);
+                    if (CheckIfKilled())
                     {
-                        double damageTaken = playerStatisticsController.DealDamage();
-                        audioSource.Play();
-                        TakeDamage(damageTaken);
-                        ShowDamageTaken(damageTaken);
-                        if (CheckIfKilled())
-                        {
-                            Die();
-                        }
+                        Die();
                     }
                 }
             }
@@ -245,14 +255,14 @@ namespace MyRPGGame.Enemies
             DropItems(expBall, Random.Range(4, 8), 10);
             numberOfEnemies--;
             EventManager.Instance.TriggerEvent(new OnNumberOfEnemiesChanged(numberOfEnemies));
+            moving = false;
+            alive = false;
+            theAn.SetTrigger(AnimatorDieTrigger);
+            Destroy(gameObject, 0.6f);
             if (numberOfEnemies == 0)
             {
                 EventManager.Instance.TriggerEvent(new OnLevelCompleted());
             }
-            moving = false;
-            alive = false;
-            theAn.SetTrigger("Die");
-            Destroy(gameObject, 0.6f);
         }
         private void DropItems(GameObject item, int amountOfItems, double valueMultiplicator = 1)
         {
@@ -262,7 +272,6 @@ namespace MyRPGGame.Enemies
                 spawnedItem.GetComponent<Collectable>().value = stats.GetStat(Stat.Lvl) * valueMultiplicator;
             }
         }
-
         private void StartPause(OnPauseStart eventData)
         {
             enemyRigidbody.velocity = Vector3.zero;
