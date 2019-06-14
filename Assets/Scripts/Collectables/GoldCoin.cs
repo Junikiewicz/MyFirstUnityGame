@@ -14,7 +14,8 @@ namespace MyRPGGame.Collectables
             if (playerStatisticsController)
             {
                 GameObject popUp = Instantiate(goldPopup, transform.position + (Vector3)(Random.insideUnitCircle * 0.3f), Quaternion.identity, transform);
-                int gold = Mathf.RoundToInt((float)(value + Random.Range((float)(-0.2 * value), (float)(0.2 * value))));
+                float gold = (float)value;
+                gold+= Mathf.RoundToInt(Random.Range(-0.2f *gold, 0.2f * gold));
                 popUp.GetComponentInChildren<PopupText>().ShowText("+"+(gold).ToString()+" g",Color.yellow,2);
                 audioSource.Play();
                 spriteRenderer.enabled = false;
