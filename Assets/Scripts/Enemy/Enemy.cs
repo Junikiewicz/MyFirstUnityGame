@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using MyRPGGame.Statistic;
+using MyRPGGame.Statistics;
 using MyRPGGame.PathFinding;
 using MyRPGGame.Player;
 using MyRPGGame.Events;
@@ -49,14 +49,14 @@ namespace MyRPGGame.Enemies
         {
             return new Vector3(transform.position.x, transform.position.y - 1f, 0);
         }
-        public double GetStat(System.Type stat)
+        public double GetStat(Stat stat)
         {
             return stats.GetStat(stat);
         }
 
         public double DealDamage()//used by player
         {
-            double basicDamage = stats.GetStat(typeof(AttackDamage));
+            double basicDamage = stats.GetStat(Stat.AttackDamage);
             return basicDamage+Random.Range((float)(-0.2*basicDamage),(float)(0.2*basicDamage));
         }
 
@@ -79,14 +79,14 @@ namespace MyRPGGame.Enemies
         protected virtual void Start()
         {
             int lvl = GameplayController.Instance.currentWorldLevel;
-            stats.AddStat(new AttackDamage(enemyStatsTempalte.startingAttackDamage + lvl * enemyStatsTempalte.attackDamageAddedOnPromotion));
-            stats.AddStat(new AttackSpeed(enemyStatsTempalte.startingAttackSpeed + lvl * enemyStatsTempalte.attackSpeedAddedOnPromotion));
-            stats.AddStat(new Health(enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
-            stats.AddStat(new Speed(enemyStatsTempalte.startingSpeed + lvl * enemyStatsTempalte.speedAddedOnPromotion));
-            stats.AddStat(new AttackRange(enemyStatsTempalte.startingAttackRange + lvl * enemyStatsTempalte.attackRangeAddedOnPromotion));
-            stats.AddStat(new SightRange(enemyStatsTempalte.startingSightRange + lvl * enemyStatsTempalte.sightRangeAddedOnPromotion));
-            stats.AddStat(new MaximumHealth(enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
-            stats.AddStat(new Lvl(lvl));
+            stats.AddStat(new Statistic(Stat.AttackDamage,enemyStatsTempalte.startingAttackDamage + lvl * enemyStatsTempalte.attackDamageAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.AttackSpeed,enemyStatsTempalte.startingAttackSpeed + lvl * enemyStatsTempalte.attackSpeedAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.Health,enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.Speed,enemyStatsTempalte.startingSpeed + lvl * enemyStatsTempalte.speedAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.AttackRange,enemyStatsTempalte.startingAttackRange + lvl * enemyStatsTempalte.attackRangeAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.SightRange,enemyStatsTempalte.startingSightRange + lvl * enemyStatsTempalte.sightRangeAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.MaximumHealth,enemyStatsTempalte.startingMaxHealth + lvl * enemyStatsTempalte.healthAddedOnPromotion));
+            stats.AddStat(new Statistic(Stat.Lvl,lvl));
         }
         private void Update()
         {
@@ -109,13 +109,13 @@ namespace MyRPGGame.Enemies
         private void SimpleAI()
         {
             distanceFromPlayer = Vector3.Distance(GetCurrentEnemyPosition(), PlayerController.Instance.GetCurrentPlayerPosition());
-            if (distanceFromPlayer <= stats.GetStat(typeof(SightRange)))
+            if (distanceFromPlayer <= stats.GetStat(Stat.SightRange))
             {
-                if (distanceFromPlayer <= stats.GetStat(typeof(AttackRange)))
+                if (distanceFromPlayer <= stats.GetStat(Stat.AttackRange))
                 {
                     //attackPlayer
                     moving = false;
-                    if (attackTimer > 1 / stats.GetStat(typeof(AttackSpeed)))
+                    if (attackTimer > 1 / stats.GetStat(Stat.AttackSpeed))
                     {
                         Attack();
                         attackTimer = 0;
@@ -168,7 +168,7 @@ namespace MyRPGGame.Enemies
         {
             if (moving&&!attacking)
             {
-                enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
+                enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(Stat.Speed);
             }
             else
             {
@@ -232,11 +232,11 @@ namespace MyRPGGame.Enemies
 
         private void TakeDamage(double amountOfDamage)
         {
-            stats.ChangeStatBase(typeof(Health), stats.GetStat(typeof(Health)) - amountOfDamage);
+            stats.ChangeStatBase(Stat.Health, stats.GetStat(Stat.Health) - amountOfDamage);
         }
         private bool CheckIfKilled()
         {
-            if (stats.GetStat(typeof(Health)) < 0)
+            if (stats.GetStat(Stat.Health) < 0)
             {
                 return true;
             }
@@ -262,7 +262,7 @@ namespace MyRPGGame.Enemies
             for (int i = 0; i < amountOfItems; i++)
             {
                 var spawnedItem = Instantiate(item, transform.position + (Vector3)Random.insideUnitCircle * 1.5f, Quaternion.identity);
-                spawnedItem.GetComponent<Collectable>().value = stats.GetStat(typeof(Lvl)) * valueMultiplicator;
+                spawnedItem.GetComponent<Collectable>().value = stats.GetStat(Stat.Lvl) * valueMultiplicator;
             }
         }
 

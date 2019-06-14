@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using MyRPGGame.Statistic;
+using MyRPGGame.Statistics;
 
 namespace MyRPGGame.Enemies
 {
@@ -22,7 +22,7 @@ namespace MyRPGGame.Enemies
             theAn.SetTrigger(AnimatorSpellcastTrigger);
             GameObject missile = Instantiate(fireball, transform.position, Quaternion.identity);
             FireBall fireballComponent = missile.GetComponent<FireBall>();
-            fireballComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
+            fireballComponent.SetDamage(stats.GetStat(Stat.AttackDamage));
         }
     }
 }

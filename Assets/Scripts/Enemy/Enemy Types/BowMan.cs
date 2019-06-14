@@ -1,5 +1,5 @@
 ﻿using MyRPGGame.Player;
-using MyRPGGame.Statistic;
+using MyRPGGame.Statistics;
 using UnityEngine;
 
 namespace MyRPGGame.Enemies
@@ -33,7 +33,7 @@ namespace MyRPGGame.Enemies
             {
                 GameObject missile = Instantiate(arrow, transform.position, Quaternion.identity);
                 Arrow arrowComponent = missile.GetComponent<Arrow>();
-                arrowComponent.SetDamage(stats.GetStat(typeof(AttackDamage)));
+                arrowComponent.SetDamage(stats.GetStat(Stat.AttackDamage));
             }
         }
     }

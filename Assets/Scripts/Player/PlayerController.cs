@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using MyRPGGame.Statistic;
+using MyRPGGame.Statistics;
 using MyRPGGame.Enemies;
 using MyRPGGame.Events;
 
@@ -103,8 +103,8 @@ namespace MyRPGGame.Player
         {
             if (!attacking)
             {
-                velocity.x = Input.GetAxisRaw(InputHorizontalAxis) * (float)playerStats.GetPlayerStat(typeof(Speed));
-                velocity.y = Input.GetAxisRaw(InputVerticalAxis) * (float)playerStats.GetPlayerStat(typeof(Speed));
+                velocity.x = Input.GetAxisRaw(InputHorizontalAxis) * (float)playerStats.GetPlayerStat(Stat.Speed);
+                velocity.y = Input.GetAxisRaw(InputVerticalAxis) * (float)playerStats.GetPlayerStat(Stat.Speed);
             }
             else
             {
@@ -144,7 +144,7 @@ namespace MyRPGGame.Player
                 attackBuffor = 0;
             }
             if ((Input.GetButtonDown(AttackButton) || (Input.GetButton(AttackButton) && timeDelayForHoldingSpace > 0.3f)) &&
-              playerStats.GetPlayerStat(typeof(Stamina)) > 50 &&
+              playerStats.GetPlayerStat(Stat.Stamina) > 50 &&
               attackBuffor < 3)
             {
                 playerStats.ChangeStamina(-50);

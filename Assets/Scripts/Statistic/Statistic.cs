@@ -1,15 +1,17 @@
 ﻿using System.Collections.Generic;
 
-namespace MyRPGGame.Statistic
+namespace MyRPGGame.Statistics
 {
-    public abstract class Statistic
+    public class Statistic
     {
-        public Statistic(double startingValue)
+        public Statistic(Stat identifier,double startingValue)
         {
+            Identifier = identifier;
             OrginalValue = CurrentValue = startingValue;
             AdditiveModifiers = new List<double>();
             MultiplicativeModifers = new List<double>();
         }
+        public Stat Identifier { get; set; }
         public double OrginalValue { get; set; }
         public double CurrentValue { get; set; }
         public List<double> AdditiveModifiers { get; set; }
