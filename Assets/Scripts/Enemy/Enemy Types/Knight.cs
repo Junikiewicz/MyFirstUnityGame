@@ -8,13 +8,8 @@
             base.Awake();
             characterClass = EnemyClass.knight;
         }
-        protected override void Start()
-        {
-            base.Start();
-        }
         protected override void Attack()
         {
-            base.Attack();
             theAn.SetTrigger(AnimatorSlashTrigger);
         }
     }

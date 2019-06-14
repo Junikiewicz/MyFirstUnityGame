@@ -12,13 +12,8 @@ namespace MyRPGGame.Enemies
             base.Awake();
             characterClass = EnemyClass.mage;
         }
-        protected override void Start()
-        {
-            base.Start();
-        }
         protected override void Attack()
         {
-            base.Attack();
             theAn.SetTrigger(AnimatorSpellcastTrigger);
             GameObject missile = Instantiate(fireball, transform.position, Quaternion.identity);
             FireBall fireballComponent = missile.GetComponent<FireBall>();

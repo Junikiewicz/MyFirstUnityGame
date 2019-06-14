@@ -14,13 +14,8 @@ namespace MyRPGGame.Enemies
             base.Awake();
             characterClass = EnemyClass.bowman;
         }
-        protected override void Start()
-        {
-            base.Start();
-        }
         protected override void Attack()
         {
-            base.Attack();
             if (PlayerController.Instance != null)
             {
                 theAn.SetTrigger(AnimatorShotTrigger);

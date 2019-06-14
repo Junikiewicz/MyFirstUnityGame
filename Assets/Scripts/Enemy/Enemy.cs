@@ -9,7 +9,7 @@ using System.Collections;
 
 namespace MyRPGGame.Enemies
 {
-    public class Enemy : MonoBehaviour, IDamageDealer
+    public abstract class Enemy : MonoBehaviour, IDamageDealer
     {
         public static int numberOfEnemies = 0;
         public EnemyClass characterClass;
@@ -199,10 +199,7 @@ namespace MyRPGGame.Enemies
                 }
             }
         }
-        virtual protected void Attack()
-        {
-
-        }
+        protected abstract void Attack();
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (alive)
