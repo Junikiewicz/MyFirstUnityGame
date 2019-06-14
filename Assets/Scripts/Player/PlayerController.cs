@@ -91,7 +91,7 @@ namespace MyRPGGame.Player
                 {
                     double damage = damageDealer.DealDamage();
                     playerStats.ChangeHealth(-damage);
-                    GameObject popUp = Instantiate(damageTakenPopup, GetCurrentPlayerPosition() + Vector3.right * (Random.Range(-0.3f, 0.3f)) + Vector3.up * (Random.Range(1f, 2f)), Quaternion.identity, transform);
+                    GameObject popUp = Instantiate(damageTakenPopup,transform.position+(Vector3)(Random.insideUnitCircle * 0.3f), Quaternion.identity, transform);
                     popUp.GetComponentInChildren<PopupText>().ShowText(((int)damage).ToString(), Color.red, 3);
                     gotHit.Play();
                     EventManager.Instance.TriggerEvent(new OnPlayerHit());

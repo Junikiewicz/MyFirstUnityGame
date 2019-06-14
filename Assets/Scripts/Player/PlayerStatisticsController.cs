@@ -100,8 +100,7 @@ namespace MyRPGGame.Player
         public double DealDamage()//Used by enemies to get amount of damage they should receive
         {
             double damage = stats.GetStat(typeof(AttackDamage));
-            damage = Random.Range((float)(damage - 0.2 * damage), (float)(damage + 0.2 * damage));
-            return damage;
+            return  damage+ Random.Range((float)(-0.2 * damage), (float)(0.2 * damage));
         }
         public void ChangeHealth(double healthDifference)
         {

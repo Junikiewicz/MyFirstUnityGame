@@ -56,7 +56,8 @@ namespace MyRPGGame.Enemies
 
         public double DealDamage()//used by player
         {
-            return stats.GetStat(typeof(AttackDamage));
+            double basicDamage = stats.GetStat(typeof(AttackDamage));
+            return basicDamage+Random.Range((float)(-0.2*basicDamage),(float)(0.2*basicDamage));
         }
 
         protected virtual void Awake()
@@ -165,7 +166,7 @@ namespace MyRPGGame.Enemies
 
         private void FixedUpdate()
         {
-            if (moving)
+            if (moving&&!attacking)
             {
                 enemyRigidbody.velocity = currentDirection * (float)stats.GetStat(typeof(Speed));
             }
@@ -225,7 +226,7 @@ namespace MyRPGGame.Enemies
         }
         private void ShowDamageTaken(double damageTaken)
         {
-            GameObject popUp = Instantiate(damageTakenPopup, GetCurrentEnemyPosition() + Vector3.right * (Random.Range(-0.2f, 0.2f)) + Vector3.up * (Random.Range(0.5f, 1f)), Quaternion.identity, transform);
+            GameObject popUp = Instantiate(damageTakenPopup, transform.position + (Vector3)(Random.insideUnitCircle * 0.3f), Quaternion.identity, transform);
             popUp.GetComponentInChildren<PopupText>().ShowText(((int)damageTaken).ToString(), Color.white, 3);
         }
 

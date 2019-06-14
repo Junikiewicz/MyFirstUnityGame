@@ -61,7 +61,7 @@ namespace MyRPGGame.World
             waterMap.size = new Vector3Int(4 * siezeOfTheMap, 3 * siezeOfTheMap, 0);
             waterMap.FloodFill(waterMap.origin, waterTile);
 
-            PlaceObjects(siezeOfTheMap / 2, 3, BuildingsPrefabsCatalog);
+            PlaceObjects(siezeOfTheMap / 4, 3, BuildingsPrefabsCatalog);
             PlaceObjects(siezeOfTheMap, 2, TressPrefabsCatalog);
             PlaceObjects(8 * siezeOfTheMap, 1, ExtrasPrefabCatalog);
             SpawnEnemies();

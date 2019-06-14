@@ -75,7 +75,7 @@ namespace MyRPGGame.Enemies
         }
         public double DealDamage()
         {
-            return damage;
+            return damage + Random.Range((float)(-0.2 * damage), (float)(0.2 * damage));
         }
         private void StartPause(OnPauseStart eventData)
         {

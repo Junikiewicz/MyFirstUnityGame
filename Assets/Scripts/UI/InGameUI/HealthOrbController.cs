@@ -29,7 +29,7 @@ namespace MyRPGGame.UI
         private void UpdateOrb()
         {
             healthOrb.fillAmount = (float)(currentHealth / maximumHealth);
-            healthAmount.text = currentHealth.ToString();
+            healthAmount.text = ((int)currentHealth).ToString();
         }
         private void OnDestroy()
         {

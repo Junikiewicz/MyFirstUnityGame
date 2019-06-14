@@ -54,7 +54,7 @@ namespace MyRPGGame
         }
         private void CreateWorld()
         {
-            WorldGeneration.Instance.StartGeneratingWorld(30, currentWorldLevel * 10);
+            WorldGeneration.Instance.StartGeneratingWorld(25+currentWorldLevel*2, 8+currentWorldLevel*5);
         }
         private void AllEnemiesKilled(OnLevelCompleted eventData)
         {
