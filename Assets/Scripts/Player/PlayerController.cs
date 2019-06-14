@@ -16,13 +16,15 @@ namespace MyRPGGame.Player
         private Rigidbody2D playerRigibody2D;
         private Animator playerAnimator;
 
+        private float timeDelayForHoldingSpace;
+        private bool pause = true;
+
+        //player state
         private bool sprinting;
         private bool exhausted;
         private bool attacking;
         private int attackBuffor;
         private Vector2 velocity;
-        private float timeDelayForHoldingSpace;
-        private bool pause = true;
 
         //input
         private const string SprintButton = "Sprint";
@@ -40,7 +42,6 @@ namespace MyRPGGame.Player
         private const string LastYAnimatorParametr = "LastY";
         private const string AttackBufferAnimatorParametr = "AttackBuffor";
 
-
         public static PlayerController Instance { get; private set; }
         public Vector3 GetCurrentPlayerPosition()//hotfix due to wrongly placed pivot in 500+ sprites. Will be fixed as soon as i get sorting groups right.
         {
@@ -56,6 +57,9 @@ namespace MyRPGGame.Player
                 playerAnimator = GetComponent<Animator>();
                 playerRigibody2D = GetComponent<Rigidbody2D>();
 
+                EventManager.Instance.AddListener<OnNewGame>(ActivatePlayer); ;
+                EventManager.Instance.AddListener<OnGameLoaded>(ActivatePlayer);
+                EventManager.Instance.AddListener<OnPlayerKilled>(DeactivatePlayerAfterDelay); 
                 EventManager.Instance.AddListener<OnPlayerKilled>(PlayerKillied);
                 EventManager.Instance.AddListener<OnPlayerExhausted>(PlayerExhaustion);
                 EventManager.Instance.AddListener<OnPauseStart>(StartPause);
@@ -67,6 +71,7 @@ namespace MyRPGGame.Player
                 Destroy(gameObject);//Prevent object duplicates when switching scenes
             }
         }
+
         private void Update()
         {
             if (!pause)
@@ -91,12 +96,22 @@ namespace MyRPGGame.Player
                 {
                     double damage = damageDealer.DealDamage();
                     playerStats.ChangeHealth(-damage);
-                    GameObject popUp = Instantiate(damageTakenPopup,transform.position+(Vector3)(Random.insideUnitCircle * 0.3f), Quaternion.identity, transform);
-                    popUp.GetComponentInChildren<PopupText>().ShowText(((int)damage).ToString(), Color.red, 3);
+                    ShowDamageTaken(damage);
                     gotHit.Play();
                     EventManager.Instance.TriggerEvent(new OnPlayerHit());
                 }
             }
+        }
+        private void ShowDamageTaken(double damage)
+        {
+            GameObject popUp = Instantiate(damageTakenPopup, transform.position + (Vector3)(Random.insideUnitCircle * 0.3f), Quaternion.identity, transform);
+            popUp.GetComponentInChildren<PopupText>().ShowText(((int)damage).ToString(), Color.red, 3);
+        }
+
+        public double DealDamage()//Used by enemies to get amount of damage they should receive
+        {
+            double damage = playerStats.GetPlayerStat(Stat.AttackDamage);
+            return damage + Random.Range((float)(-0.2 * damage), (float)(0.2 * damage));
         }
 
         private void PlayerMovement()
@@ -121,7 +136,7 @@ namespace MyRPGGame.Player
             {
                 sprinting = false;
             }
-
+            //UpdateAnimations
             playerAnimator.SetBool(SprintAnimatorParametr, sprinting);
             playerAnimator.SetFloat(YAnimatorParametr, velocity.y);
             playerAnimator.SetFloat(XAnimatorParametr, velocity.x);
@@ -134,15 +149,12 @@ namespace MyRPGGame.Player
         private void PlayerAttack()
         {
             timeDelayForHoldingSpace += Time.deltaTime;
-            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag))
+            attacking = playerAnimator.GetCurrentAnimatorStateInfo(0).IsTag(AttackAnimationTag);
+            if(!attacking)
             {
-                attacking = true;
-            }
-            else
-            {
-                attacking = false;
                 attackBuffor = 0;
             }
+
             if ((Input.GetButtonDown(AttackButton) || (Input.GetButton(AttackButton) && timeDelayForHoldingSpace > 0.3f)) &&
               playerStats.GetPlayerStat(Stat.Stamina) > 50 &&
               attackBuffor < 3)
@@ -151,6 +163,7 @@ namespace MyRPGGame.Player
                 attackBuffor++;
                 timeDelayForHoldingSpace = 0;
             }
+            //Update Animations
             playerAnimator.SetInteger(AttackBufferAnimatorParametr, attackBuffor);
         }
         private void StartPause(OnPauseStart eventData)
@@ -181,6 +194,25 @@ namespace MyRPGGame.Player
         {
             transform.position = eventData.destination;
         }
+        private void ActivatePlayer(OnNewGame eventData)
+        {
+            gameObject.SetActive(true);
+        }
+
+        private void ActivatePlayer(OnGameLoaded eventData)
+        {
+            gameObject.SetActive(true);
+        }
+
+        private void DeactivatePlayerAfterDelay(OnPlayerKilled eventData)
+        {
+            Invoke(nameof(DeactivatePlayer), 1f);
+        }
+
+        private void DeactivatePlayer()
+        {
+            gameObject.SetActive(false);
+        }
         private void OnDestroy()
         {
             if (Instance == this)
@@ -191,6 +223,9 @@ namespace MyRPGGame.Player
                 EventManager.Instance.RemoveListener<OnPauseEnd>(EndPause);
                 EventManager.Instance.RemoveListener<OnPlayerKilled>(PlayerKillied);
                 EventManager.Instance.RemoveListener<OnPlayerTeleportation>(TeleportPlayer);
+                EventManager.Instance.RemoveListener<OnNewGame>(ActivatePlayer); ;
+                EventManager.Instance.RemoveListener<OnGameLoaded>(ActivatePlayer);
+                EventManager.Instance.RemoveListener<OnPlayerKilled>(DeactivatePlayerAfterDelay);
             }
         }
     }

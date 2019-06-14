@@ -217,10 +217,10 @@ namespace MyRPGGame.Enemies
         {
             if (alive && collision.attachedRigidbody && collision.isTrigger)
             {
-                PlayerStatisticsController playerStatisticsController = collision.attachedRigidbody.GetComponent<PlayerStatisticsController>();
-                if (playerStatisticsController)
+                PlayerController playerController = collision.attachedRigidbody.GetComponent<PlayerController>();
+                if (playerController)
                 {
-                    double damageTaken = playerStatisticsController.DealDamage();
+                    double damageTaken = playerController.DealDamage();
                     audioSource.Play();
                     TakeDamage(damageTaken);
                     ShowDamageTaken(damageTaken);

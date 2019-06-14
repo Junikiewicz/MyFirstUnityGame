@@ -98,11 +98,6 @@ namespace MyRPGGame.Player
             }
             EventManager.Instance.TriggerEvent(new OnPlayerExperimenceChanged(stats.GetStat(Stat.Experimence)));
         }
-        public double DealDamage()//Used by enemies to get amount of damage they should receive
-        {
-            double damage = stats.GetStat(Stat.AttackDamage);
-            return damage + Random.Range((float)(-0.2 * damage), (float)(0.2 * damage));
-        }
         public void ChangeHealth(double healthDifference)
         {
             double newHealth = stats.GetStat(Stat.Health) +healthDifference;
@@ -192,7 +187,6 @@ namespace MyRPGGame.Player
         private void PlayerNewGame(OnNewGame data)
         {
             SetStartingValues();
-            gameObject.SetActive(true);
             RefreshWholeGUI();
         }
         private void EndPause(OnPauseEnd data)
@@ -213,7 +207,6 @@ namespace MyRPGGame.Player
             stats.ChangeStatBase(Stat.Lvl, data.saveData.lvl);
             stats.ChangeStatBase(Stat.Gold, data.saveData.gold);
             stats.ChangeStatBase(Stat.RequiredExperimence, CalculateExperimenceRequired(data.saveData.lvl));
-            gameObject.SetActive(true);
             RefreshWholeGUI();
         }
         public void SavePlayerStatsData(OnGameSaved data)
@@ -232,13 +225,7 @@ namespace MyRPGGame.Player
         private void Die()
         {
             EventManager.Instance.TriggerEvent(new OnPlayerKilled());
-            Invoke(nameof(DeactivatePlayer), 1f);
         }
-        private void DeactivatePlayer()
-        {
-            gameObject.SetActive(false);
-        }
-
         private void OnDisable()
         {
             CancelInvoke(nameof(Regeneration));
