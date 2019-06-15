@@ -2,7 +2,7 @@
 
 It's my first game created with Unity - action-rpg. 
 
-Current progress: https://youtu.be/MfI1yEX5cGQ 
+Current progress: https://youtu.be/Lj8Zdi6jwZo
 
 ## What have I learned so far
 
