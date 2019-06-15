@@ -21,8 +21,6 @@ Just a simple popup message showing damage taken by the enemy.
 
 ## TODO
 
-Enemy moving in random directions when there is no player nearby
-
 Separation of animations and enemy logic into different scripts
 
 Optimized connection with pathfinding Unit
